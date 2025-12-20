@@ -1,15 +1,24 @@
-import { Types } from "mongoose"
-
 export type TUser = {
-    name: string,
-    photo?: string,
-    address?: {
-        location?: string,
-        city?: string,
-        state?: string,
-        postCode?: string,
-        country?: string,
-        timeZone?: string
-    },
-    accountId?: Types.ObjectId
-}
+  phoneNumber: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  invitationCode: string;
+  userId: string;
+  superiorUserId?: string;
+  superiorUserName?: string;
+  userLavel?: string;
+  quantityOfOrders?: number;
+  withdrowalValidOddNumber?: number;
+  actualCompletedNumberToday?: number;
+  userBalance: number;
+  memberTotalRecharge?: number;
+  memberTotalWithdrawal?: number;
+  userOrderFreezingAmount?: number;
+  amountFrozedInWithdrawal?: number;
+  whetherOnline?: boolean;
+  mobilePhoneAreaCode?: string;
+  lastLoginIp: string;
+  lastLoginTime: Date;
+  userType: string;
+};

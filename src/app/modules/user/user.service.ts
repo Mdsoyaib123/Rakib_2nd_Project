@@ -1,22 +1,37 @@
-import { Request } from "express"
-import uploadCloud from "../../utils/cloudinary";
+import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
-import { Account_Model } from "../auth/auth.schema";
 
-const update_profile_into_db = async (req: Request) => {
-    // upload file and get link
-    if (req.file) {
-        const uploadedImage = await uploadCloud(req.file);
-        req.body.photo = uploadedImage?.secure_url;
-    };
+const createUser = async (payload: Partial<TUser>) => {
+  return await User_Model.create(payload);
+};
 
-    const isExistUser = await Account_Model.findOne({ email: req?.user?.email }).lean()
-    const result = await User_Model.findOneAndUpdate({ accountId: isExistUser!._id }, req?.body)
-    return result
-}
+const getAllUsers = async () => {
+  return await User_Model.find().sort({ createdAt: -1 });
+};
 
+const getUserById = async (id: string) => {
+  return await User_Model.findById(id);
+};
 
+const getUserByUserId = async (userId: string) => {
+  return await User_Model.findOne({ userId });
+};
+
+const updateUser = async (id: string, payload: Partial<TUser>) => {
+  return await User_Model.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+};
+
+const deleteUser = async (id: string) => {
+  return await User_Model.findByIdAndDelete(id);
+};
 
 export const user_services = {
-    update_profile_into_db
-}
+  createUser,
+  getAllUsers,
+  getUserById,
+  getUserByUserId,
+  updateUser,
+  deleteUser,
+};

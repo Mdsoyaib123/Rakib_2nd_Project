@@ -6,12 +6,10 @@ import swaggerUi from "swagger-ui-express";
 import globalErrorHandler from './app/middlewares/global_error_handler';
 import notFound from './app/middlewares/not_found_api';
 import appRouter from './routes';
-import { swaggerOptions } from './swaggerOptions';
+
 
 // define app
 const app = express()
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // middleware
 app.use(cors({

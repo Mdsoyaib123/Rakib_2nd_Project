@@ -4,7 +4,7 @@ export type TUser = {
   password: string;
   confirmPassword: string;
   invitationCode: string;
-  userId: string;
+  userId: number;
   superiorUserId?: string;
   superiorUserName?: string;
   userLavel?: string;

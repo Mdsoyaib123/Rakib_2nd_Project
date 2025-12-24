@@ -22,13 +22,7 @@ import { user_services } from "./user.service";
   res.json({ success: true, data: users });
 };
 
- const getUserById = async (req: Request, res: Response) => {
-  const user = await user_services.getUserById(req.params.id);
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
-  }
-  res.json({ success: true, data: user });
-};
+
 
  const getUserByUserId = async (req: Request, res: Response) => {
   const user = await user_services.getUserByUserId(req.params.userId);
@@ -52,7 +46,6 @@ import { user_services } from "./user.service";
 export const user_controllers = {
   createUser,
   getAllUsers,
-  getUserById,
   getUserByUserId,
   updateUser,
   deleteUser,

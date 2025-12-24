@@ -7,7 +7,11 @@ const userSchema = new Schema<TUser>(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     invitationCode: { type: String, required: true },
-    userId: { type: String, required: true, unique: true },
+    userId: {
+      type: Number,
+      unique: true,
+      default: () => Math.floor(1000000 + Math.random() * 9000000),
+    },
 
     superiorUserId: { type: String },
     superiorUserName: { type: String },
@@ -26,10 +30,10 @@ const userSchema = new Schema<TUser>(
     whetherOnline: { type: Boolean, default: true },
     mobilePhoneAreaCode: { type: String },
 
-    lastLoginIp: { type: String, required: true },
-    lastLoginTime: { type: Date, required: true },
+    lastLoginIp: { type: String },
+    lastLoginTime: { type: Date },
 
-    userType: { type: String, required: true },
+    userType: { type: String, required: true, default: "Normal" },
   },
   { timestamps: true }
 );

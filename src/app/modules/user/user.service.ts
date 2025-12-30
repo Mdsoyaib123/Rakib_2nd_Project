@@ -17,11 +17,6 @@ const createUser = async (payload: Partial<TUser>) => {
 
   const ieExists = await User_Model.findOne({ email: payload.email });
 
-  if (payload.password) {
-    const hashedPassword = await bcrypt.hash(payload?.password, 10);
-    payload.password = hashedPassword;
-  }
-
   if (ieExists) {
     throw new Error("Email already exists");
   }
@@ -31,10 +26,13 @@ const createUser = async (payload: Partial<TUser>) => {
     payload.password = hashedPassword;
   }
 
+
   const invitationCode = await generateUniqueInvitationCode();
   payload.invitationCode = invitationCode;
 
   const user = new User_Model(payload);
+
+  console.log('user', user)
   return await user.save();
 };
 
@@ -64,6 +62,31 @@ const freezeUser = async (id: string, isFreeze: boolean) => {
   );
 };
 
+const rechargeUserBalance = async (id: string, amount: number) => {
+  const user = await User_Model.findById(id);
+  const newBalance = (user?.userBalance || 0) + amount;
+  return await User_Model.findByIdAndUpdate(
+    id,
+    {
+      userBalance: newBalance,
+      memberTotalRecharge: (user?.memberTotalRecharge || 0) + amount,
+    },
+    { new: true }
+  );
+};
+const decreaseUserBalance = async (id: string, amount: number) => {
+  const user = await User_Model.findById(id);
+  const newBalance = (user?.userBalance || 0) - amount;
+  return await User_Model.findByIdAndUpdate(
+    id,
+    {
+      userBalance: newBalance,
+      memberTotalRecharge: (user?.memberTotalRecharge || 0) - amount,
+    },
+    { new: true }
+  );
+};
+
 export const user_services = {
   createUser,
   getAllUsers,
@@ -72,4 +95,6 @@ export const user_services = {
   updateUser,
   deleteUser,
   freezeUser,
+  rechargeUserBalance,
+  decreaseUserBalance
 };

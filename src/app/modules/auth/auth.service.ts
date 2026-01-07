@@ -5,15 +5,15 @@ import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import { TUser } from "../user/user.interface";
 import { User_Model } from "../user/user.schema";
-import mongoose from "mongoose";
 import { jwtHelpers } from "../../utils/JWT";
 import { configs } from "../../configs";
 import { JwtPayload, Secret } from "jsonwebtoken";
 import sendMail from "../../utils/mail_sender";
-import { isAccountExist } from "../../utils/isAccountExist";
 
 const login_user_from_db = async (payload: TLoginPayload) => {
+
   const isExistAccount = await User_Model.findOne({ email: payload.email });
+  // console.log("is account", isExistAccount);
   if (!isExistAccount) {
     throw new AppError("Account does not exist", httpStatus.NOT_FOUND);
   }
@@ -25,6 +25,7 @@ const login_user_from_db = async (payload: TLoginPayload) => {
   if (!isPasswordMatch) {
     throw new AppError("Invalid password", httpStatus.UNAUTHORIZED);
   }
+
   const accessToken = jwtHelpers.generateToken(
     {
       email: isExistAccount.email,
@@ -34,7 +35,7 @@ const login_user_from_db = async (payload: TLoginPayload) => {
     configs.jwt.access_token_expires as string
   );
 
-  //   console.log("accessToken", accessToken);
+  // console.log("accessToken", accessToken);
 
   const refreshToken = jwtHelpers.generateToken(
     {
@@ -120,7 +121,10 @@ const change_password_from_db = async (
 };
 
 const forget_password_from_db = async (email: string) => {
-  const isAccountExists = await isAccountExist(email);
+  const isAccountExists = await User_Model.findOne({ email: email });
+  if (!isAccountExists) {
+    throw new AppError("Account not found", httpStatus.NOT_FOUND);
+  }
   const resetToken = jwtHelpers.generateToken(
     {
       email: isAccountExists.email,
@@ -161,7 +165,12 @@ const reset_password_into_db = async (
     );
   }
 
-  const isAccountExists = await isAccountExist(email);
+  const isAccountExists = await User_Model.findOne({
+    email: decodedData.email,
+  });
+  if (!isAccountExists) {
+    throw new AppError("Account not found", httpStatus.NOT_FOUND);
+  }
 
   const hashedPassword: string = await bcrypt.hash(newPassword, 10);
 
@@ -203,7 +212,11 @@ const verified_account_into_db = async (token: string) => {
 };
 
 const get_new_verification_link_from_db = async (email: string) => {
-  const isExistAccount = await isAccountExist(email);
+  const isExistAccount = await User_Model.findOne({ email });
+  // check account
+  if (!isExistAccount) {
+    throw new AppError("Account not found!!", httpStatus.NOT_FOUND);
+  }
 
   const verifiedToken = jwtHelpers.generateToken(
     {

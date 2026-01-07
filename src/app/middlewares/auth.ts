@@ -22,7 +22,7 @@ const auth = (...roles: Role[]) => {
       }
       // check user
       const isUserExist = await User_Model.findOne({
-        email: verifiedUser?.email,
+        phoneNumber: verifiedUser?.phoneNumber,
       }).lean();
       if (!isUserExist) {
         throw new AppError("Account not found !", 404);

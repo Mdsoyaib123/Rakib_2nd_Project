@@ -25,8 +25,8 @@ const login_user = catchAsync(async (req, res) => {
 });
 
 const get_my_profile = catchAsync(async (req, res) => {
-  const { email } = req.user!;
-  const result = await auth_services.get_my_profile_from_db(email);
+  const { phoneNumber } = req.user!;
+  const result = await auth_services.get_my_profile_from_db(phoneNumber);
   manageResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

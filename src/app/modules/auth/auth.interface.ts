@@ -14,7 +14,7 @@ export interface TRegisterPayload extends TAccount {
 }
 
 export type TLoginPayload = {
-    email: string;
+    phoneNumber: string;
     password: string
 }
 

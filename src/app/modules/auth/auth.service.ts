@@ -12,7 +12,7 @@ import sendMail from "../../utils/mail_sender";
 
 const login_user_from_db = async (payload: TLoginPayload) => {
 
-  const isExistAccount = await User_Model.findOne({ email: payload.email });
+  const isExistAccount = await User_Model.findOne({ phoneNumber: payload.phoneNumber });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {
     throw new AppError("Account does not exist", httpStatus.NOT_FOUND);
@@ -28,7 +28,7 @@ const login_user_from_db = async (payload: TLoginPayload) => {
 
   const accessToken = jwtHelpers.generateToken(
     {
-      email: isExistAccount.email,
+      phoneNumber: isExistAccount.phoneNumber,
       role: isExistAccount.role,
     },
     configs.jwt.access_token_secret as Secret,
@@ -39,7 +39,7 @@ const login_user_from_db = async (payload: TLoginPayload) => {
 
   const refreshToken = jwtHelpers.generateToken(
     {
-      email: isExistAccount.email,
+      phoneNumber: isExistAccount.phoneNumber,
       role: isExistAccount.role,
     },
     configs.jwt.refresh_token_secret as Secret,
@@ -53,9 +53,9 @@ const login_user_from_db = async (payload: TLoginPayload) => {
   };
 };
 
-const get_my_profile_from_db = async (email: string) => {
+const get_my_profile_from_db = async (phoneNumber: string) => {
   const accountProfile = await User_Model.findOne({
-    email: email,
+    phoneNumber: phoneNumber,
   });
 
   return {
@@ -75,12 +75,12 @@ const refresh_token_from_db = async (token: string) => {
   }
 
   const userData = await User_Model.findOne({
-    email: decodedData.email,
+    phoneNumber: decodedData.phoneNumber,
   });
 
   const accessToken = jwtHelpers.generateToken(
     {
-      email: userData!.email,
+      phoneNumber: userData!.phoneNumber,
       role: userData!.role,
     },
     configs.jwt.access_token_secret as Secret,
@@ -97,7 +97,7 @@ const change_password_from_db = async (
     newPassword: string;
   }
 ) => {
-  const isExistAccount = await User_Model.findOne({ email: user.email });
+  const isExistAccount = await User_Model.findOne({ phoneNumber: user.phoneNumber });
   if (!isExistAccount) {
     throw new AppError("Account not found", httpStatus.NOT_FOUND);
   }
@@ -112,7 +112,7 @@ const change_password_from_db = async (
 
   const hashedPassword: string = await bcrypt.hash(payload.newPassword, 10);
   await User_Model.findOneAndUpdate(
-    { email: isExistAccount.email },
+    { phoneNumber: isExistAccount.phoneNumber },
     {
       password: hashedPassword,
     }

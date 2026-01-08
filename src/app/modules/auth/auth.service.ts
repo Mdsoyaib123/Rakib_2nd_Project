@@ -16,16 +16,20 @@ const login_user_from_db = async (
 ) => {
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
+    freezeUser: false,
   });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {
-    throw new AppError("Account does not exist", httpStatus.NOT_FOUND);
+    throw new AppError(
+      "Account does not exist or frozen",
+      httpStatus.NOT_FOUND
+    );
   }
   console.log("ip address 444", ipAddress);
 
   await User_Model.findOneAndUpdate(
     { phoneNumber: payload.phoneNumber },
-    { lastLoginIp: ipAddress, lastLoginAt: new Date() }
+    { lastLoginIp: ipAddress, lastLoginTime: new Date() }
   );
 
   const isPasswordMatch = await bcrypt.compare(

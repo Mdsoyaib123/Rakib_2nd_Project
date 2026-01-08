@@ -24,4 +24,5 @@ export type TUser = {
   lastLoginIp: string;
   lastLoginTime: Date;
   userType: string;
+  userOrderAmount: number[];
 };

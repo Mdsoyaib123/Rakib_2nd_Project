@@ -50,22 +50,45 @@ const updateProduct = async (productId: number, payload: Partial<TProduct>) => {
   return updatedProduct;
 };
 // product.service.ts
-const getAllProducts = async (page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
+const getAllProducts = async (
+  page = 1,
+  limit = 10,
+  name?: string,
+  productId?: string
+) => {
+  const query: any = {};
 
-  const [data, total] = await Promise.all([
-    ProductModel.find().sort({ salePrice: -1 }).skip(skip).limit(limit),
+  if (name) {
+    query.name = { $regex: name, $options: "i" }; // Case-insensitive regex search
+  }
 
-    ProductModel.countDocuments(),
-  ]);
+  if (productId) {
+    query.productId = Number(productId);
+  }
+
+  const data = await ProductModel.find(query)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .exec();
 
   return {
     data,
   };
 };
 
+const deleteProduct = async (productId: number) => {
+  const deletedProduct = await ProductModel.findOneAndDelete({ productId });
+
+  if (!deletedProduct) {
+    throw new Error("Product not found");
+  }
+
+  return deletedProduct;
+}
+
 export const ProductService = {
   createProduct,
   updateProduct,
   getAllProducts,
+  deleteProduct
 };

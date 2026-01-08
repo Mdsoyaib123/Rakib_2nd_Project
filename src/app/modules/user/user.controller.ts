@@ -20,6 +20,7 @@ const getAllUsers = async (req: Request, res: Response) => {
       phoneLast4: req.query.phoneLast4 as string,
       name: req.query.name as string,
       userType: req.query.userType as string,
+      lastLoginTime: req.query.lastLoginTime as string,
     });
 
     res.status(200).json({
@@ -108,6 +109,26 @@ const decreaseUserBalance = async (req: Request, res: Response) => {
   }
 };
 
+const updateUserOrderAmount = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { amount } = req.body;
+
+    const result = await user_services.updateUserOrderAmount(userId, amount);
+
+    res.status(200).json({
+      success: true,
+      message: `Amount updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const user_controllers = {
   createUser,
   getAllUsers,
@@ -117,4 +138,5 @@ export const user_controllers = {
   freezeUser,
   rechargeUserBalance,
   decreaseUserBalance,
+  updateUserOrderAmount,
 };

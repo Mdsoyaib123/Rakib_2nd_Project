@@ -11,7 +11,11 @@ router.delete("/delete/:userId", user_controllers.deleteUser);
 router.put("/freeze/:userId", user_controllers.freezeUser);
 router.put("/recharge/:userId", user_controllers.rechargeUserBalance);
 router.put("/decrease/:userId", user_controllers.decreaseUserBalance);
-
+// user.route.ts
+router.patch(
+  "/update-order-amount/:userId",
+  user_controllers.updateUserOrderAmount
+);
 
 export const userRoute = router;
 

@@ -46,6 +46,8 @@ const userSchema = new Schema<TUser>(
     lastLoginTime: { type: Date },
 
     userType: { type: String, required: true, default: "Normal" },
+    userOrderAmount: { type: [Number], default: [] },
+    
   },
   { timestamps: true }
 );

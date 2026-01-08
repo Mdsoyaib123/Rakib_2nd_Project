@@ -51,6 +51,7 @@ const getAllUsers = async (query: any) => {
     phoneLast4,
     name,
     userType,
+    lastLoginTime,
   } = query;
 
   const filter: any = {};
@@ -78,6 +79,13 @@ const getAllUsers = async (query: any) => {
   // 🔍 User Type
   if (userType) {
     filter.userType = userType;
+  }
+  // 🔍 Last Login Time (date range)
+  if (lastLoginTime) {
+    filter.lastLoginTime = {
+      $gte: new Date(new Date(lastLoginTime).setHours(0, 0, 0, 0)),
+      $lte: new Date(new Date(lastLoginTime).setHours(23, 59, 59, 999)),
+    };
   }
 
   const skip = (page - 1) * limit;
@@ -138,6 +146,23 @@ const decreaseUserBalance = async (id: string, amount: number) => {
     { new: true }
   );
 };
+const updateUserOrderAmount = async (
+  userId: string,
+  amount: number | number[]
+) => {
+
+  const updatedUser = await User_Model.findOneAndUpdate(
+    { userId: Number(userId) },
+    { userOrderAmount: amount },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new Error("User not found");
+  }
+
+  return updatedUser;
+};
 
 export const user_services = {
   createUser,
@@ -149,4 +174,5 @@ export const user_services = {
   freezeUser,
   rechargeUserBalance,
   decreaseUserBalance,
+  updateUserOrderAmount,
 };

@@ -147,13 +147,13 @@ const decreaseUserBalance = async (id: number, amount: number) => {
     { new: true }
   );
 };
-const updateUserOrderAmount = async (
+const updateUserOrderAmountSlot = async (
   userId: number,
   amount: number | number[]
 ) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: Number(userId) },
-    { userOrderAmount: amount },
+    { userOrderAmountSlot: amount },
     { new: true }
   );
 
@@ -179,44 +179,119 @@ const updateUserSelectedPackageAmount = async (
 
   return updatedUser;
 };
-const purchaseOrder = async (userId: number) => {
-  const user: any = await User_Model.findOne({ userId: userId });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-  if (user?.freezeUser) {
-    return { message: "User account is frozen" };
-  }
-  if (user?.userSelectedPackage === 0) {
-    return { message: "Please select a slot first" };
-  }
-  if (user?.quantityOfOrders <= 0) {
-    return { message: "Insufficient order quantity" };
-  }
-
-  const products = await ProductModel.aggregate([
-    { $match: { salePrice: { $lte: user.userBalance } } },
-    { $sample: { size: 1 } },
-  ]);
-
-  if (!products.length) {
-    return { message: "Insufficient balance to purchase any product" };
-  }
-
-  const product = products[0];
-
-  await User_Model.findOneAndUpdate(
-    { userId },
-    {
-      $inc: {
-        quantityOfOrders: -1,
-        userBalance: -product.salePrice,
-      },
-    }
+const updateQuantityOfOrders = async (userId: number, quantity: number) => {
+  const updatedUser = await User_Model.findOneAndUpdate(
+    { userId: userId },
+    { quantityOfOrders: quantity },
+    { new: true }
   );
 
-  return product;
+  if (!updatedUser) {
+    throw new Error("User not found");
+  }
+
+  return updatedUser;
+};
+
+const updateAdminAssaignProduct = async (
+  userId: number,
+  productId: number,
+  orderNumber: number
+) => {
+  const updatedUser = await User_Model.findOneAndUpdate(
+    {
+      userId: userId,
+      "adminAssaignProducts.orderNumber": { $ne: orderNumber },
+    },
+    {
+      $push: {
+        adminAssaignProducts: {
+          productId,
+          orderNumber,
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new Error(
+      `Order number ${orderNumber} already assigned or user not found`
+    );
+  }
+
+  return updatedUser;
+};
+
+const purchaseOrder = async (userId: number) => {
+  const user: any = await User_Model.findOne({ userId });
+
+  if (!user) throw new Error("User not found");
+  if (user.freezeUser) return { message: "User account is frozen" };
+  if (!user.userSelectedPackage)
+    return { message: "Please select a slot first" };
+  if (user.quantityOfOrders <= 0)
+    return { message: "Insufficient order quantity" };
+
+  // ✅ Correct order number
+  const currentOrderNumber = user.completedOrdersCount + 1;
+  console.log("Current Order Number:", currentOrderNumber);
+
+  let product: any;
+
+  // 🎯 Check admin assigned product
+  const forcedProductRule = user.adminAssaignProducts.find(
+    (rule: any) => rule.orderNumber === currentOrderNumber
+  );
+
+  if (forcedProductRule) {
+    product = await ProductModel.findOne({
+      productId: forcedProductRule.productId,
+    });
+
+    if (!product) throw new Error("Assigned product not found");
+
+    if (product.salePrice > user.userBalance) {
+      return { message: "Insufficient balance for assigned product" };
+    }
+  } else {
+    // 🎲 Random product
+    const products = await ProductModel.aggregate([
+      { $match: { salePrice: { $lte: user.userBalance } } },
+      { $sample: { size: 1 } },
+    ]);
+
+    if (!products.length) {
+      return { message: "Insufficient balance to purchase any product" };
+    }
+
+    product = products[0];
+  }
+
+  // 🧠 Build update object
+  const updateQuery: any = {
+    $inc: {
+      quantityOfOrders: -1,
+      completedOrdersCount: 1,
+      userBalance: -product.salePrice,
+    },
+  };
+
+  // 🧹 REMOVE used admin assigned rule
+  if (forcedProductRule) {
+    updateQuery.$pull = {
+      adminAssaignProducts: { orderNumber: currentOrderNumber },
+    };
+  }
+
+  // 💾 Update user
+  await User_Model.updateOne({ userId }, updateQuery);
+
+  return {
+    orderNumber: currentOrderNumber,
+    product,
+    isAdminAssigned: !!forcedProductRule,
+  };
 };
 
 export const user_services = {
@@ -229,7 +304,9 @@ export const user_services = {
   freezeUser,
   rechargeUserBalance,
   decreaseUserBalance,
-  updateUserOrderAmount,
+  updateUserOrderAmountSlot,
   updateUserSelectedPackageAmount,
+  updateQuantityOfOrders,
+  updateAdminAssaignProduct,
   purchaseOrder,
 };

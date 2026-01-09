@@ -14,11 +14,19 @@ router.put("/decrease/:userId", user_controllers.decreaseUserBalance);
 // user.route.ts
 router.patch(
   "/update-order-amount/:userId",
-  user_controllers.updateUserOrderAmount
+  user_controllers.updateUserOrderAmountSlot
 );
 router.patch(
   "/update-selected-package-amount/:userId",
   user_controllers.updateUserSelectedPackageAmount
+);
+router.patch(
+  "/update-quantity-of-orders/:userId",
+  user_controllers.updateQuantityOfOrders
+);
+router.patch(
+  "/update-admin-assigned-product/:userId",
+  user_controllers.updateAdminAssaignProduct
 );
 router.get(
   "/purchase-order/:userId",

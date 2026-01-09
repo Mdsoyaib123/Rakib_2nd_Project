@@ -23,6 +23,8 @@ export type TUser = {
   lastLoginIp: string;
   lastLoginTime: Date;
   userType: string;
-  userOrderAmount: number[];
+  userOrderAmountSlot: number[];
   userSelectedPackage?: number;
+  completedOrdersCount?: number;
+  adminAssaignProducts?: string[];
 };

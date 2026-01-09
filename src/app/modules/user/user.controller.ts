@@ -114,12 +114,12 @@ const decreaseUserBalance = async (req: Request, res: Response) => {
   }
 };
 
-const updateUserOrderAmount = async (req: Request, res: Response) => {
+const updateUserOrderAmountSlot = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const { amount } = req.body;
 
-    const result = await user_services.updateUserOrderAmount(
+    const result = await user_services.updateUserOrderAmountSlot(
       userId as unknown as number,
       amount
     );
@@ -144,6 +144,51 @@ const updateUserSelectedPackageAmount = async (req: Request, res: Response) => {
     const result = await user_services.updateUserSelectedPackageAmount(
       userId as unknown as number,
       amount
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Amount updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const updateQuantityOfOrders = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { quantity } = req.body;
+
+    const result = await user_services.updateQuantityOfOrders(
+      userId as unknown as number,
+      quantity
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Quantity updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const updateAdminAssaignProduct = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { productId, orderNumber } = req.body;
+
+    const result = await user_services.updateAdminAssaignProduct(
+      userId as unknown as number,
+      productId,
+      orderNumber
     );
 
     res.status(200).json({
@@ -188,7 +233,9 @@ export const user_controllers = {
   freezeUser,
   rechargeUserBalance,
   decreaseUserBalance,
-  updateUserOrderAmount,
+  updateUserOrderAmountSlot,
+  updateQuantityOfOrders,
   updateUserSelectedPackageAmount,
+  updateAdminAssaignProduct,
   purchaseOrder,
 };

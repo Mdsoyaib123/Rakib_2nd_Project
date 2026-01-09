@@ -1,4 +1,5 @@
 import { generateUniqueInvitationCode } from "../../utils/genarateInvitationCode";
+import { ProductModel } from "../product/product.model";
 import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
@@ -100,9 +101,9 @@ const getAllUsers = async (query: any) => {
     data,
   };
 };
-const getUserByUserId = async (userId: string) => {
+const getUserByUserId = async (userId: number) => {
   console.log("userid ", userId);
-  return await User_Model.findOne({ _id: userId });
+  return await User_Model.findOne({ userId: userId });
 };
 
 const updateUser = async (id: string, payload: Partial<TUser>) => {
@@ -111,22 +112,22 @@ const updateUser = async (id: string, payload: Partial<TUser>) => {
   });
 };
 
-const deleteUser = async (id: string) => {
-  return await User_Model.findByIdAndDelete(id);
+const deleteUser = async (id: number) => {
+  return await User_Model.findOneAndDelete({ userId: id });
 };
-const freezeUser = async (id: string, isFreeze: boolean) => {
-  return await User_Model.findByIdAndUpdate(
-    id,
+const freezeUser = async (id: number, isFreeze: boolean) => {
+  return await User_Model.findOneAndUpdate(
+    { userId: id },
     { freezeUser: isFreeze },
     { new: true }
   );
 };
 
-const rechargeUserBalance = async (id: string, amount: number) => {
-  const user = await User_Model.findById(id);
+const rechargeUserBalance = async (id: number, amount: number) => {
+  const user = await User_Model.findOne({ userId: id });
   const newBalance = (user?.userBalance || 0) + amount;
-  return await User_Model.findByIdAndUpdate(
-    id,
+  return await User_Model.findOneAndUpdate(
+    { userId: id },
     {
       userBalance: newBalance,
       memberTotalRecharge: (user?.memberTotalRecharge || 0) + amount,
@@ -134,11 +135,11 @@ const rechargeUserBalance = async (id: string, amount: number) => {
     { new: true }
   );
 };
-const decreaseUserBalance = async (id: string, amount: number) => {
-  const user = await User_Model.findById(id);
+const decreaseUserBalance = async (id: number, amount: number) => {
+  const user = await User_Model.findOne({ userId: id });
   const newBalance = (user?.userBalance || 0) - amount;
-  return await User_Model.findByIdAndUpdate(
-    id,
+  return await User_Model.findOneAndUpdate(
+    { userId: id },
     {
       userBalance: newBalance,
       memberTotalRecharge: (user?.memberTotalRecharge || 0) - amount,
@@ -147,10 +148,9 @@ const decreaseUserBalance = async (id: string, amount: number) => {
   );
 };
 const updateUserOrderAmount = async (
-  userId: string,
+  userId: number,
   amount: number | number[]
 ) => {
-
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: Number(userId) },
     { userOrderAmount: amount },
@@ -162,6 +162,61 @@ const updateUserOrderAmount = async (
   }
 
   return updatedUser;
+};
+const updateUserSelectedPackageAmount = async (
+  userId: number,
+  amount: number
+) => {
+  const updatedUser = await User_Model.findOneAndUpdate(
+    { userId: userId },
+    { userSelectedPackage: amount },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new Error("User not found");
+  }
+
+  return updatedUser;
+};
+const purchaseOrder = async (userId: number) => {
+  const user: any = await User_Model.findOne({ userId: userId });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  if (user?.freezeUser) {
+    return { message: "User account is frozen" };
+  }
+  if (user?.userSelectedPackage === 0) {
+    return { message: "Please select a slot first" };
+  }
+  if (user?.quantityOfOrders <= 0) {
+    return { message: "Insufficient order quantity" };
+  }
+
+  const products = await ProductModel.aggregate([
+    { $match: { salePrice: { $lte: user.userBalance } } },
+    { $sample: { size: 1 } },
+  ]);
+
+  if (!products.length) {
+    return { message: "Insufficient balance to purchase any product" };
+  }
+
+  const product = products[0];
+
+  await User_Model.findOneAndUpdate(
+    { userId },
+    {
+      $inc: {
+        quantityOfOrders: -1,
+        userBalance: -product.salePrice,
+      },
+    }
+  );
+
+  return product;
 };
 
 export const user_services = {
@@ -175,4 +230,6 @@ export const user_services = {
   rechargeUserBalance,
   decreaseUserBalance,
   updateUserOrderAmount,
+  updateUserSelectedPackageAmount,
+  purchaseOrder,
 };

@@ -37,7 +37,9 @@ const getAllUsers = async (req: Request, res: Response) => {
 
 const getUserByUserId = async (req: Request, res: Response) => {
   try {
-    const user = await user_services.getUserByUserId(req.params.userId);
+    const user = await user_services.getUserByUserId(
+      req.params.userId as unknown as number
+    );
     if (!user) {
       return res
         .status(404)
@@ -60,7 +62,7 @@ const updateUser = async (req: Request, res: Response) => {
 
 const deleteUser = async (req: Request, res: Response) => {
   try {
-    await user_services.deleteUser(req.params.userId);
+    await user_services.deleteUser(req.params.userId as unknown as number);
     res.json({ success: true, message: "User deleted successfully" });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
@@ -69,7 +71,10 @@ const deleteUser = async (req: Request, res: Response) => {
 
 const freezeUser = async (req: Request, res: Response) => {
   try {
-    await user_services.freezeUser(req.params.userId, req.body.isFreeze);
+    await user_services.freezeUser(
+      req.params.userId as unknown as number,
+      req.body.isFreeze
+    );
     res.json({
       success: true,
       message: "User freeze status updated successfully",
@@ -81,7 +86,7 @@ const freezeUser = async (req: Request, res: Response) => {
 const rechargeUserBalance = async (req: Request, res: Response) => {
   try {
     const result = await user_services.rechargeUserBalance(
-      req.params.userId,
+      req.params.userId as unknown as number,
       req.body.amount
     );
     res.json({
@@ -96,7 +101,7 @@ const rechargeUserBalance = async (req: Request, res: Response) => {
 const decreaseUserBalance = async (req: Request, res: Response) => {
   try {
     const result = await user_services.decreaseUserBalance(
-      req.params.userId,
+      req.params.userId as unknown as number,
       req.body.amount
     );
     res.json({
@@ -114,11 +119,56 @@ const updateUserOrderAmount = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const { amount } = req.body;
 
-    const result = await user_services.updateUserOrderAmount(userId, amount);
+    const result = await user_services.updateUserOrderAmount(
+      userId as unknown as number,
+      amount
+    );
 
     res.status(200).json({
       success: true,
       message: `Amount updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const updateUserSelectedPackageAmount = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { amount } = req.body;
+
+    const result = await user_services.updateUserSelectedPackageAmount(
+      userId as unknown as number,
+      amount
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Amount updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const purchaseOrder = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.purchaseOrder(
+      userId as unknown as number
+    );
+
+    res.status(200).json({
+      success: true,
+      message: ` product order  successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -139,4 +189,6 @@ export const user_controllers = {
   rechargeUserBalance,
   decreaseUserBalance,
   updateUserOrderAmount,
+  updateUserSelectedPackageAmount,
+  purchaseOrder,
 };

@@ -16,6 +16,13 @@ router.patch(
   "/update-order-amount/:userId",
   user_controllers.updateUserOrderAmount
 );
+router.patch(
+  "/update-selected-package-amount/:userId",
+  user_controllers.updateUserSelectedPackageAmount
+);
+router.get(
+  "/purchase-order/:userId",
+  user_controllers.purchaseOrder
+);
 
 export const userRoute = router;
-

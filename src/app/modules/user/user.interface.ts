@@ -10,7 +10,6 @@ export type TUser = {
   freezeUser?: boolean;
   superiorUserId?: string;
   superiorUserName?: string;
-  userLavel?: string;
   quantityOfOrders?: number;
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;
@@ -25,4 +24,5 @@ export type TUser = {
   lastLoginTime: Date;
   userType: string;
   userOrderAmount: number[];
+  userSelectedPackage?: number;
 };

@@ -27,8 +27,6 @@ const userSchema = new Schema<TUser>(
     },
     freezeUser: { type: Boolean, default: false },
 
-    userLavel: { type: String },
-
     quantityOfOrders: { type: Number, default: 0 },
     withdrowalValidOddNumber: { type: Number, default: 0 },
     actualCompletedNumberToday: { type: Number, default: 0 },
@@ -47,7 +45,7 @@ const userSchema = new Schema<TUser>(
 
     userType: { type: String, required: true, default: "Normal" },
     userOrderAmount: { type: [Number], default: [] },
-    
+    userSelectedPackage: { type: Number },
   },
   { timestamps: true }
 );

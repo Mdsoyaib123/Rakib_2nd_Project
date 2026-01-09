@@ -51,6 +51,7 @@ const userSchema = new Schema<TUser>(
       type: [{ productId: Number, orderNumber: Number }],
       default: [],
     },
+    completedOrderProducts: { type: [String], default: [] },
   },
   { timestamps: true }
 );

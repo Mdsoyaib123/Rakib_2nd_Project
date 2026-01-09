@@ -32,5 +32,9 @@ router.get(
   "/purchase-order/:userId",
   user_controllers.purchaseOrder
 );
+router.patch(
+  "/confirmed-purchase-order/:userId",
+  user_controllers.confirmedPurchaseOrder
+);
 
 export const userRoute = router;

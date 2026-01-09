@@ -27,4 +27,5 @@ export type TUser = {
   userSelectedPackage?: number;
   completedOrdersCount?: number;
   adminAssaignProducts?: string[];
+  completedOrderProducts?: string[];
 };

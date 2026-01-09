@@ -223,6 +223,26 @@ const purchaseOrder = async (req: Request, res: Response) => {
     });
   }
 };
+const confirmedPurchaseOrder = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.confirmedPurchaseOrder(
+      userId as unknown as number
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `confirmed product order  successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -238,4 +258,5 @@ export const user_controllers = {
   updateUserSelectedPackageAmount,
   updateAdminAssaignProduct,
   purchaseOrder,
+  confirmedPurchaseOrder
 };

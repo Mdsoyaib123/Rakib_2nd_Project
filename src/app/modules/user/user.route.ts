@@ -33,7 +33,7 @@ router.get(
   user_controllers.purchaseOrder
 );
 router.patch(
-  "/confirmed-purchase-order/:userId",
+  "/confirmed-purchase-order/:userId/:productId",
   user_controllers.confirmedPurchaseOrder
 );
 

@@ -225,10 +225,11 @@ const purchaseOrder = async (req: Request, res: Response) => {
 };
 const confirmedPurchaseOrder = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.params;
+    const { userId, productId } = req.params;
 
     const result = await user_services.confirmedPurchaseOrder(
-      userId as unknown as number
+      userId as unknown as number,
+      productId as unknown as number
     );
 
     res.status(200).json({
@@ -258,5 +259,5 @@ export const user_controllers = {
   updateUserSelectedPackageAmount,
   updateAdminAssaignProduct,
   purchaseOrder,
-  confirmedPurchaseOrder
+  confirmedPurchaseOrder,
 };

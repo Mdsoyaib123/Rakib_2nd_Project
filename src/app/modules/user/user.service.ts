@@ -271,7 +271,7 @@ const purchaseOrder = async (userId: number) => {
   };
 };
 
-const confirmedPurchaseOrder = async (userId: number) => {
+const confirmedPurchaseOrder = async (userId: number, productId: number) => {
   const user: any = await User_Model.findOne({ userId });
 
   if (!user) throw new Error("User not found");
@@ -280,31 +280,17 @@ const confirmedPurchaseOrder = async (userId: number) => {
 
   const currentOrderNumber = user.completedOrdersCount + 1;
 
-  let product: any;
+  const product = await ProductModel.findOne({
+    productId: productId,
+  });
+
+  if (!product) throw new Error("Product not found");
+
   let forcedProductRule: any = null;
 
   forcedProductRule = user.adminAssaignProducts?.find(
     (rule: any) => rule.orderNumber === currentOrderNumber
   );
-
-  if (forcedProductRule) {
-    product = await ProductModel.findOne({
-      productId: forcedProductRule.productId,
-    });
-
-    if (!product) throw new Error("Assigned product not found");
-  } else {
-    const products = await ProductModel.aggregate([
-      { $match: { salePrice: { $lte: user.userBalance } } },
-      { $sample: { size: 1 } },
-    ]);
-
-    if (!products.length) {
-      return { message: "Insufficient balance" };
-    }
-
-    product = products[0];
-  }
 
   // ✅ ATOMIC UPDATE
   const updateQuery: any = {
@@ -328,11 +314,10 @@ const confirmedPurchaseOrder = async (userId: number) => {
 
   return {
     orderNumber: currentOrderNumber,
-    product,
-    confirmed: true,
+    productId: product.productId,
+    user,
   };
 };
-
 
 export const user_services = {
   createUser,

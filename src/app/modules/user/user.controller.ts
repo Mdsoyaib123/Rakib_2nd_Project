@@ -98,6 +98,24 @@ const rechargeUserBalance = async (req: Request, res: Response) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+const enableOrderRound = async (req: Request, res: Response) => {
+  try {
+    const { round, status } = req.body;
+    const result = await user_services.enableOrderRound(
+      req.params.userId as unknown as number,
+      round,
+      status
+    );
+    res.json({
+      success: true,
+      message: "User order round enabled successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 const decreaseUserBalance = async (req: Request, res: Response) => {
   try {
     const result = await user_services.decreaseUserBalance(
@@ -161,11 +179,13 @@ const updateUserSelectedPackageAmount = async (req: Request, res: Response) => {
 const updateQuantityOfOrders = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const { quantity } = req.body;
+    const { quantity, status } = req.body;
 
     const result = await user_services.updateQuantityOfOrders(
       userId as unknown as number,
-      quantity
+      quantity,
+      status
+
     );
 
     res.status(200).json({
@@ -279,6 +299,7 @@ export const user_controllers = {
   deleteUser,
   freezeUser,
   rechargeUserBalance,
+  enableOrderRound,
   decreaseUserBalance,
   updateUserOrderAmountSlot,
   updateQuantityOfOrders,

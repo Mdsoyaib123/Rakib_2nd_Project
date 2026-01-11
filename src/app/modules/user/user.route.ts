@@ -10,6 +10,7 @@ router.patch("/update/:userId", user_controllers.updateUser);
 router.delete("/delete/:userId", user_controllers.deleteUser);
 router.put("/freeze/:userId", user_controllers.freezeUser);
 router.put("/recharge/:userId", user_controllers.rechargeUserBalance);
+router.put("/admin-order-enable-round/:userId", user_controllers.enableOrderRound);
 router.put("/decrease/:userId", user_controllers.decreaseUserBalance);
 // user.route.ts
 router.patch(

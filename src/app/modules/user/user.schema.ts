@@ -30,26 +30,27 @@ const userSchema = new Schema<TUser>(
       enum: ["trial", "deposit"],
       default: "trial",
     },
-    freezeUser: { type: Boolean, default: false },
 
     orderRound: {
       type: {
         round: {
           type: String,
-          enum: ["one", "two"],
+          enum: ["trial", "round_one", "round_two"],
           required: true,
-          default: "one",
+          default: "trial",
         },
         status: {
           type: Boolean,
-          default: true, // active round
+          default: true,
         },
       },
       default: {
-        round: "one",
-        status: false,
+        round: "trial",
+        status: true,
       },
     },
+
+    freezeUser: { type: Boolean, default: false },
 
     quantityOfOrders: { type: Number, default: 0 },
     completedOrdersCount: { type: Number, default: 0 },

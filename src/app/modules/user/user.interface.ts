@@ -12,11 +12,11 @@ export type TUser = {
   superiorUserId?: string;
   superiorUserName?: string;
   quantityOfOrders?: number;
-  orderRound : {
-    round: 'one' | 'two'
-    status : boolean,
-    
-  },
+  orderRound?: {
+    round: "trial" | "round_one" | "round_two";
+    status: boolean;
+  };
+
   withdrawalAddressAndMethod?: {
     BankName: string;
     withdrawalAddress: string;

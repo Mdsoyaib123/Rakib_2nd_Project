@@ -37,7 +37,13 @@ const createUser = async (payload: Partial<TUser>) => {
 
   const invitationCode = await generateUniqueInvitationCode();
   payload.invitationCode = invitationCode;
-  payload.quantityOfOrders = 25;//default
+
+  payload.quantityOfOrders = 25; // Trial round orders
+  payload.userDiopsitType = "trial";
+  payload.orderRound = {
+    round: "trial",
+    status: true,
+  };
 
   const user = new User_Model(payload);
 
@@ -125,18 +131,51 @@ const freezeUser = async (id: number, isFreeze: boolean) => {
   );
 };
 
-const rechargeUserBalance = async (id: number, amount: number) => {
-  const user = await User_Model.findOne({ userId: id });
-  const newBalance = (user?.userBalance || 0) + amount;
+const rechargeUserBalance = async (userId: number, amount: number) => {
+  const user: any = await User_Model.findOne({ userId });
+  if (!user) throw new Error("User not found");
+
+  if (user.orderRound.round !== "trial" && !user.orderRound.status) {
+    throw new Error("All order rounds completed. Now recharge fast!");
+  }
+
+  // ✅ Set deposit type and unlock first deposit round, but user can't order yet
   return await User_Model.findOneAndUpdate(
-    { userId: id },
+    { userId },
     {
-      userBalance: newBalance,
-      memberTotalRecharge: (user?.memberTotalRecharge || 0) + amount,
+      $set: {
+        userDiopsitType: "deposit",
+        "orderRound.round": "round_one",
+        "orderRound.status": false, // ❌ user cannot order yet
+      },
+      $inc: {
+        userBalance: amount,
+        memberTotalRecharge: amount,
+      },
     },
     { new: true }
   );
 };
+
+const enableOrderRound = async (
+  userId: number,
+  round: "round_one" | "round_two",
+  status : boolean,
+  quantity: number = 25
+) => {
+  return await User_Model.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        "orderRound.round": round,
+        "orderRound.status": status,
+        quantityOfOrders: quantity, // admin decides quantity
+      },
+    },
+    { new: true }
+  );
+};
+
 const decreaseUserBalance = async (id: number, amount: number) => {
   const user = await User_Model.findOne({ userId: id });
   const newBalance = (user?.userBalance || 0) - amount;
@@ -181,7 +220,11 @@ const updateUserSelectedPackageAmount = async (
 
   return updatedUser;
 };
-const updateQuantityOfOrders = async (userId: number, round : string , status : boolean ) => {
+const updateQuantityOfOrders = async (
+  userId: number,
+  round: string,
+  status: boolean
+) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { "orderRound.round": round, "orderRound.status": status },
@@ -193,7 +236,6 @@ const updateQuantityOfOrders = async (userId: number, round : string , status : 
   }
 
   return updatedUser;
- 
 };
 
 const updateAdminAssaignProduct = async (
@@ -239,6 +281,10 @@ const purchaseOrder = async (userId: number) => {
   if (user.freezeUser) return { message: "User account is frozen" };
   if (!user.userSelectedPackage)
     return { message: "Please select a slot first" };
+  if (!user.orderRound.status) {
+    return { message: "No active order round available" };
+  }
+
   if (user.quantityOfOrders <= 0)
     return { message: "Insufficient order quantity" };
 
@@ -261,7 +307,7 @@ const purchaseOrder = async (userId: number) => {
       { new: true }
     ).lean();
 
-    if (!product) throw new Error("Assigned product not found");
+    // if (!product) throw new Error("Assigned product not found");
 
     isAdminAssigned = true;
   } else {
@@ -281,7 +327,7 @@ const purchaseOrder = async (userId: number) => {
     orderNumber: currentOrderNumber,
     product,
     isAdminAssigned,
-    outOfBalance: product.price - user.userBalance,
+    outOfBalance: forcedProductRule ? product.price - user.userBalance : null,
     mysteryboxMethod: forcedProductRule?.mysterybox?.method
       ? forcedProductRule?.mysterybox?.method
       : null,
@@ -297,6 +343,14 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
   try {
     const user: any = await User_Model.findOne({ userId }).session(session);
+
+    if (user.quantityOfOrders === 0) {
+      await User_Model.updateOne(
+        { userId },
+        { $set: { "orderRound.status": false } },
+        { session }
+      );
+    }
 
     if (!user) throw new Error("User not found");
     if (user.quantityOfOrders <= 0)
@@ -390,6 +444,7 @@ export const user_services = {
   deleteUser,
   freezeUser,
   rechargeUserBalance,
+  enableOrderRound,
   decreaseUserBalance,
   updateUserOrderAmountSlot,
   updateUserSelectedPackageAmount,

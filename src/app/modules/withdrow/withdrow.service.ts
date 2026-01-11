@@ -79,10 +79,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
   await User_Model.updateOne(
     { userId: withdraw.userId },
     {
-      $inc: {
-        amountFrozedInWithdrawal: -withdraw.withdrawalAmount,
-        memberTotalWithdrawal: withdraw.withdrawalAmount,
-      },
+      $inc: {},
     }
   );
 
@@ -91,8 +88,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
 
 const rejectWithdrawService = async (
   withdrawId: string,
-  reviewRemark?: string,
-  
+  reviewRemark?: string
 ) => {
   const withdraw = await Withdraw_Model.findById(withdrawId);
 

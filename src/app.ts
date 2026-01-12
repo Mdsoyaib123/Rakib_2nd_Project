@@ -21,6 +21,7 @@ app.use(
       "http://localhost:5174",
       "https://dainty-semifreddo-2cf1f0.netlify.app",
       "https://rainbow-sopapillas-9e5e0e.netlify.app",
+      "https://juwelo-dashboard.vercel.app",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],

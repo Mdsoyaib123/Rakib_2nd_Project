@@ -315,7 +315,7 @@ const purchaseOrder = async (userId: number) => {
     isAdminAssigned = true;
   } else {
     const products = await ProductModel.aggregate([
-      { $match: { salePrice: { $lte: user.userBalance } } },
+      { $match: { price: { $lte: user.userBalance } } },
       { $sample: { size: 1 } },
     ]);
 

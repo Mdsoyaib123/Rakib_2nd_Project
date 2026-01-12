@@ -77,7 +77,10 @@ const userSchema = new Schema<TUser>(
     lastLoginTime: { type: Date },
 
     userType: { type: String, required: true, default: "Normal" },
-    userOrderAmountSlot: { type: [Number], default: [] },
+    userOrderAmountSlot: {
+      type: [Number],
+      default: [10000, 30000, 50000, 100000, 200000, 300000, 500000],
+    },
     userSelectedPackage: { type: Number },
 
     adminAssaignProducts: {

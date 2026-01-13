@@ -68,7 +68,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
 
   if (!withdraw) throw new Error("Withdrawal not found");
   if (withdraw.transactionStatus !== "PENDING")
-    throw new Error("Withdrawal already processed");
+    throw new Error("This Withdrawal request already processed");
 
   // ✅ Update withdraw status
   withdraw.transactionStatus = "APPROVED";
@@ -94,7 +94,7 @@ const rejectWithdrawService = async (
 
   if (!withdraw) throw new Error("Withdrawal not found");
   if (withdraw.transactionStatus !== "PENDING")
-    throw new Error("Withdrawal already processed");
+    throw new Error("This Withdrawal request already processed");
 
   // ✅ Update withdraw status
   withdraw.transactionStatus = "REJECTED";

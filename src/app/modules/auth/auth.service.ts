@@ -64,7 +64,7 @@ const login_user_from_db = async (
     accessToken: accessToken,
     refreshToken: refreshToken,
     role: isExistAccount.role,
-    userId: isExistAccount._id,
+    userId: isExistAccount.userId,
   };
 };
 

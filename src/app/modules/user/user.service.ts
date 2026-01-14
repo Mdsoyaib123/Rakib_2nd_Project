@@ -24,6 +24,7 @@ const createUser = async (payload: Partial<TUser>) => {
 
   const ieExists = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
+    email: payload.email,
   });
 
   if (ieExists) {

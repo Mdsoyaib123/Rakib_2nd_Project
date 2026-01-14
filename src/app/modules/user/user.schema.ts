@@ -50,7 +50,7 @@ const userSchema = new Schema<TUser>(
       },
     },
 
-    freezeUser: { type: Boolean, default: false },
+    freezeUser: { type: Boolean, default: true },
 
     quantityOfOrders: { type: Number, default: 0 },
     completedOrdersCount: { type: Number, default: 0 },

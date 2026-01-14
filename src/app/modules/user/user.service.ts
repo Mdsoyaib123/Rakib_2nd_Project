@@ -10,7 +10,7 @@ const createUser = async (payload: Partial<TUser>) => {
     invitationCode: payload.invitationCode,
   });
 
-  console.log("superior user id ", superiorUser?.userId);
+  // console.log("superior user id ", superiorUser?.userId);
 
   if (!superiorUser) {
     throw new Error("Superior user not found");
@@ -49,7 +49,7 @@ const createUser = async (payload: Partial<TUser>) => {
 
   const user = new User_Model(payload);
 
-  console.log("user", user);
+  // console.log("user", user);
   return await user.save();
 };
 
@@ -330,7 +330,7 @@ const purchaseOrder = async (userId: number) => {
     orderNumber: currentOrderNumber,
     product,
     isAdminAssigned,
-    outOfBalance: forcedProductRule ? product.price - user.userBalance : null,
+    outOfBalance: forcedProductRule ? user.userBalance - product.price : null,
     mysteryboxMethod: forcedProductRule?.mysterybox?.method
       ? forcedProductRule?.mysterybox?.method
       : null,
@@ -394,6 +394,10 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         quantityOfOrders: -1,
         completedOrdersCount: 1,
         userBalance: forcedProductRule
+          ? Number(productCommisionTenpercent)
+          : product.commission,
+
+        dailyProfit: forcedProductRule
           ? Number(productCommisionTenpercent)
           : product.commission,
       },

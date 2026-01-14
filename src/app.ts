@@ -9,6 +9,7 @@ import appRouter from "./routes";
 import { User_Model } from "./app/modules/user/user.schema";
 import { configs } from "./app/configs";
 import bcrypt from "bcrypt";
+import cron from "node-cron";
 
 // define app
 const app = express();
@@ -75,6 +76,17 @@ export const createDefaultSuperAdmin = async () => {
 };
 
 createDefaultSuperAdmin();
+
+// Runs every day at 12:00 AM
+cron.schedule("0 0 * * *", async () => {
+  try {
+    await User_Model.updateMany({}, { $set: { dailyProfit: 0 } });
+
+    console.log("✅ Daily profit reset successfully");
+  } catch (error) {
+    console.error("❌ Daily profit reset failed:", error);
+  }
+});
 
 // global error handler
 app.use(globalErrorHandler);

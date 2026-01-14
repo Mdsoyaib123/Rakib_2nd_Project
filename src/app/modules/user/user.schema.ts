@@ -65,6 +65,7 @@ const userSchema = new Schema<TUser>(
     actualCompletedNumberToday: { type: Number, default: 0 },
 
     userBalance: { type: Number, required: true, default: 0 },
+    dailyProfit: { type: Number, default: 0 },
     memberTotalRecharge: { type: Number, default: 0 },
     memberTotalWithdrawal: { type: Number, default: 0 },
 

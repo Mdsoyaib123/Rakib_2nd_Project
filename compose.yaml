@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    image: ${DOCKER_USERNAME}/rakib-deposit-server:latest
+    container_name: rakib-deposit-server
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production

@@ -164,17 +164,18 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
 const enableOrderRound = async (
   userId: number,
   round: "round_one" | "round_two",
-  status: boolean,
-  quantity: number = 25
+  status: boolean
 ) => {
+  const user = await User_Model.findOne({ userId });
+  if (!user) throw new Error("User not found");
   return await User_Model.findOneAndUpdate(
     { userId },
     {
       $set: {
         "orderRound.round": round,
         "orderRound.status": status,
-        quantityOfOrders: quantity, // admin decides quantity
-        completedOrdersCount: 0,
+        quantityOfOrders: user?.quantityOfOrders, // admin decides quantity
+        completedOrdersCount: user?.completedOrdersCount,
       },
     },
     { new: true }
@@ -351,7 +352,7 @@ const removeMysteryReward = async (userId: number) => {
     throw new Error(error.message || "Failed to remove mystery reward");
   }
 };
-const addCheckInReward = async (userId: number , checkInAmount : number) => {
+const addCheckInReward = async (userId: number, checkInAmount: number) => {
   try {
     if (!userId) {
       throw new Error("UserId is required");
@@ -388,8 +389,6 @@ const addCheckInReward = async (userId: number , checkInAmount : number) => {
         throw new Error("You have already checked in today");
       }
     }
-
-
 
     const updatedUser = await User_Model.findOneAndUpdate(
       { userId },
@@ -506,7 +505,11 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (user.userBalance < product.price)
-      return { success: false,  message: "Insufficient balance to purchase this product.please contact to admin supports" };
+      return {
+        success: false,
+        message:
+          "Insufficient balance to purchase this product.please contact to admin supports",
+      };
 
     let forcedProductRule: any = null;
 

@@ -17,6 +17,7 @@ const login_user_from_db = async (
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
     freezeUser: false,
+    role : 'user'
   });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {

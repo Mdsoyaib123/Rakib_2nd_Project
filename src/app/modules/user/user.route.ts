@@ -10,7 +10,10 @@ router.patch("/update/:userId", user_controllers.updateUser);
 router.delete("/delete/:userId", user_controllers.deleteUser);
 router.put("/freeze/:userId", user_controllers.freezeUser);
 router.put("/recharge/:userId", user_controllers.rechargeUserBalance);
-router.put("/admin-order-enable-round/:userId", user_controllers.enableOrderRound);
+router.put(
+  "/admin-order-enable-round/:userId",
+  user_controllers.enableOrderRound
+);
 router.put("/decrease/:userId", user_controllers.decreaseUserBalance);
 // user.route.ts
 router.patch(
@@ -33,10 +36,7 @@ router.patch(
   "/remove-mystery-reward/:userId",
   user_controllers.removeMysteryReward
 );
-router.patch(
-  "/add-check-in-reward/:userId",
-  user_controllers.addCheckInReward
-);
+router.patch("/add-check-in-reward/:userId", user_controllers.addCheckInReward);
 router.get("/purchase-order/:userId", user_controllers.purchaseOrder);
 router.patch(
   "/confirmed-purchase-order/:userId/:productId",

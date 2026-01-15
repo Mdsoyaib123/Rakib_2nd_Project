@@ -16,14 +16,13 @@ const login_user_from_db = async (
 ) => {
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
-    freezeUser: false,
   });
-  // console.log("is account", isExistAccount);
+  console.log("is account", isExistAccount);
   if (!isExistAccount) {
-    throw new AppError(
-      "Account does not exist or frozen",
-      httpStatus.NOT_FOUND
-    );
+    throw new AppError("Account is   Not Found", httpStatus.NOT_FOUND);
+  }
+  if (isExistAccount?.freezeUser === true  && isExistAccount?.role !== "admin") {
+    throw new AppError("Account is   Frozen", httpStatus.NOT_FOUND);
   }
   console.log("ip address 444", ipAddress);
 
@@ -64,7 +63,7 @@ const login_user_from_db = async (
     accessToken: accessToken,
     refreshToken: refreshToken,
     role: isExistAccount.role,
-    userId: isExistAccount._id,
+    userId: isExistAccount.userId,
   };
 };
 

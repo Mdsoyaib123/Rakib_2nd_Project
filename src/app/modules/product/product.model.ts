@@ -11,6 +11,7 @@ const productSchema = new Schema<TProduct>(
     salePrice: { type: Number, required: true },
     introduction: { type: String, required: true },
     poster: { type: String, required: true },
+    isAdminAssigned: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -7,4 +7,5 @@ export interface TProduct {
   salePrice: number;
   introduction: string;
   poster: string; // image URL or filename
+  isAdminAssigned: boolean;
 }

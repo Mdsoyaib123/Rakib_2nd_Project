@@ -7,14 +7,24 @@ export type TUser = {
   confirmPassword: string;
   invitationCode: string;
   userId: number;
+  userDiopsitType: "trial" | "deposit";
   freezeUser?: boolean;
   superiorUserId?: string;
   superiorUserName?: string;
-  userLavel?: string;
   quantityOfOrders?: number;
+  orderRound?: {
+    round: "trial" | "round_one" | "round_two";
+    status: boolean;
+  };
+
+  withdrawalAddressAndMethod?: {
+    BankName: string;
+    withdrawalAddress: string;
+  };
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;
   userBalance: number;
+  dailyProfit?: number;
   memberTotalRecharge?: number;
   memberTotalWithdrawal?: number;
   userOrderFreezingAmount?: number;
@@ -24,5 +34,23 @@ export type TUser = {
   lastLoginIp: string;
   lastLoginTime: Date;
   userType: string;
-  userOrderAmount: number[];
+  userOrderAmountSlot: number[];
+  userSelectedPackage?: number;
+  completedOrdersCount?: number;
+  adminAssaignProductsOrRewards?: {
+    productId?: number;
+    orderNumber?: number;
+    mysterybox?: {
+      method: "cash" | "12x";
+      amount: string;
+    };
+  }[];
+  mysteryReward?: Number;
+  dailyCheckInReward: {
+    lastCheckInDate: Date | null;
+    totalCheckIns: number;
+  };
+
+  completedOrderProducts?: string[];
+  orderCountForCheckIn?: number;
 };

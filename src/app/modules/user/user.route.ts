@@ -10,12 +10,45 @@ router.patch("/update/:userId", user_controllers.updateUser);
 router.delete("/delete/:userId", user_controllers.deleteUser);
 router.put("/freeze/:userId", user_controllers.freezeUser);
 router.put("/recharge/:userId", user_controllers.rechargeUserBalance);
+router.put(
+  "/admin-order-enable-round/:userId",
+  user_controllers.enableOrderRound
+);
 router.put("/decrease/:userId", user_controllers.decreaseUserBalance);
 // user.route.ts
 router.patch(
   "/update-order-amount/:userId",
-  user_controllers.updateUserOrderAmount
+  user_controllers.updateUserOrderAmountSlot
+);
+router.patch(
+  "/update-selected-package-amount/:userId",
+  user_controllers.updateUserSelectedPackageAmount
+);
+router.patch(
+  "/update-quantity-of-orders/:userId",
+  user_controllers.updateQuantityOfOrders
+);
+router.patch(
+  "/update-admin-assigned-product/:userId",
+  user_controllers.updateAdminAssaignProduct
+);
+router.patch(
+  "/remove-mystery-reward/:userId",
+  user_controllers.removeMysteryReward
+);
+router.patch("/add-check-in-reward/:userId", user_controllers.addCheckInReward);
+router.get("/purchase-order/:userId", user_controllers.purchaseOrder);
+router.patch(
+  "/confirmed-purchase-order/:userId/:productId",
+  user_controllers.confirmedPurchaseOrder
+);
+router.patch(
+  "/update-withdrawal-address/:userId",
+  user_controllers.updateWithdrawalAddress
+);
+router.get(
+  "/get-user-completed-products/:userId",
+  user_controllers.getUserCompletedProducts
 );
 
 export const userRoute = router;
-

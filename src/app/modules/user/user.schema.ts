@@ -25,15 +25,47 @@ const userSchema = new Schema<TUser>(
       unique: true,
       default: () => Math.floor(1000000 + Math.random() * 9000000),
     },
-    freezeUser: { type: Boolean, default: false },
+    userDiopsitType: {
+      type: String,
+      enum: ["trial", "deposit"],
+      default: "trial",
+    },
 
-    userLavel: { type: String },
+    orderRound: {
+      type: {
+        round: {
+          type: String,
+          enum: ["trial", "round_one", "round_two"],
+          required: true,
+          default: "trial",
+        },
+        status: {
+          type: Boolean,
+          default: true,
+        },
+      },
+      default: {
+        round: "trial",
+        status: true,
+      },
+    },
+
+    freezeUser: { type: Boolean, default: true },
 
     quantityOfOrders: { type: Number, default: 0 },
+    completedOrdersCount: { type: Number, default: 0 },
+    withdrawalAddressAndMethod: {
+      type: {
+        BankName: { type: String },
+        withdrawalAddress: { type: String },
+      },
+      default: null,
+    },
     withdrowalValidOddNumber: { type: Number, default: 0 },
     actualCompletedNumberToday: { type: Number, default: 0 },
 
     userBalance: { type: Number, required: true, default: 0 },
+    dailyProfit: { type: Number, default: 0 },
     memberTotalRecharge: { type: Number, default: 0 },
     memberTotalWithdrawal: { type: Number, default: 0 },
 
@@ -46,8 +78,58 @@ const userSchema = new Schema<TUser>(
     lastLoginTime: { type: Date },
 
     userType: { type: String, required: true, default: "Normal" },
-    userOrderAmount: { type: [Number], default: [] },
-    
+    userOrderAmountSlot: {
+      type: [Number],
+      default: [10000, 30000, 50000, 100000, 200000, 300000, 500000],
+    },
+    userSelectedPackage: { type: Number },
+
+    adminAssaignProductsOrRewards: {
+      type: [
+        {
+          productId: { type: Number },
+          orderNumber: { type: Number },
+          mysterybox: {
+            type: {
+              method: {
+                type: String,
+                enum: ["cash", "12x"],
+              },
+              amount: {
+                type: String,
+              },
+            },
+            required: false, // ✅ optional
+            default: undefined,
+          },
+        },
+      ],
+      default: [],
+    },
+
+    mysteryReward: {
+      type: Number,
+      default: 0,
+    },
+    dailyCheckInReward: {
+      type: {
+        lastCheckInDate: {
+          type: Date,
+          default: null,
+        },
+        totalCheckIns: {
+          type: Number,
+          default: 0,
+        },
+      },
+      default: {
+        lastCheckInDate: null,
+        totalCheckIns: 0,
+      },
+    },
+
+    completedOrderProducts: { type: [String], default: [] },
+    orderCountForCheckIn: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

@@ -506,7 +506,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (user.userBalance < product.price)
-      return { message: "Insufficient balance to purchase this product" };
+      return { success: false,  message: "Insufficient balance to purchase this product.please contact to admin supports" };
 
     let forcedProductRule: any = null;
 

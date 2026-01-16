@@ -4,6 +4,7 @@ import { ProductModel } from "../product/product.model";
 import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
+import { HistoryModel } from "../history/history.model";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
@@ -141,29 +142,53 @@ const freezeUser = async (id: number, isFreeze: boolean) => {
 };
 
 const rechargeUserBalance = async (userId: number, amount: number) => {
-  const user: any = await User_Model.findOne({ userId });
-  if (!user) throw new Error("User not found");
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // if (user.orderRound.round !== "trial" && !user.orderRound.status) {
-  //   throw new Error("All order rounds completed. Now recharge fast!");
-  // }
+  try {
+    const user: any = await User_Model.findOne({ userId }).session(session);
+    if (!user) throw new Error("User not found");
 
-  // ✅ Set deposit type and unlock first deposit round, but user can't order yet
-  return await User_Model.findOneAndUpdate(
-    { userId },
-    {
-      $set: {
-        userDiopsitType: "deposit",
-        "orderRound.round": "round_one",
-        "orderRound.status": false, // ❌ user cannot order yet
+    const res = await User_Model.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          userDiopsitType: "deposit",
+          "orderRound.round": "round_one",
+          "orderRound.status": false, //
+        },
+        $inc: {
+          userBalance: amount,
+          memberTotalRecharge: amount,
+        },
       },
-      $inc: {
-        userBalance: amount,
-        memberTotalRecharge: amount,
-      },
-    },
-    { new: true }
-  );
+      { new: true, session }
+    );
+
+    // ✅ Record history
+    if (res) {
+      await HistoryModel.create(
+        [
+          {
+            userId: user._id, // keep ObjectId
+            historyType: "recharge",
+            amount,
+            time: new Date(),
+          },
+        ],
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 const enableOrderRound = async (
@@ -366,13 +391,15 @@ const removeMysteryReward = async (userId: number) => {
   }
 };
 const addCheckInReward = async (userId: number, checkInAmount: number) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     if (!userId) {
       throw new Error("UserId is required");
     }
 
-    const user: any = await User_Model.findOne({ userId });
-
+    const user: any = await User_Model.findOne({ userId }).session(session);
     if (!user) {
       throw new Error("User not found");
     }
@@ -403,6 +430,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
       }
     }
 
+    // ✅ Update user balance & daily check-in
     const updatedUser = await User_Model.findOneAndUpdate(
       { userId },
       {
@@ -415,11 +443,31 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
           "dailyCheckInReward.lastCheckInDate": new Date(),
         },
       },
-      { new: true }
+      { new: true, session }
     );
+
+    // ✅ Add history
+    if (updatedUser) {
+      await HistoryModel.create(
+        [
+          {
+            userId: user._id,
+            historyType: "checkIn",
+            amount: checkInAmount,
+            time: new Date(),
+          },
+        ],
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
 
     return updatedUser;
   } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("❌ Error in addCheckInReward:", error.message);
     throw new Error(error.message || "Failed to add daily check-in reward");
   }

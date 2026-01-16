@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { HistoryModel } from "../history/history.model";
 import { User_Model } from "../user/user.schema";
 import { Withdraw_Model } from "./withdrow.model";
 
@@ -64,26 +66,56 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
   return withdraw;
 };
 const acceptWithdrawService = async (withdrawId: string) => {
-  const withdraw = await Withdraw_Model.findById(withdrawId);
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!withdraw) throw new Error("Withdrawal not found");
-  if (withdraw.transactionStatus !== "PENDING")
-    throw new Error("This Withdrawal request already processed");
+  try {
+    const withdraw = await Withdraw_Model.findById(withdrawId).session(session);
+    if (!withdraw) throw new Error("Withdrawal not found");
 
-  // ✅ Update withdraw status
-  withdraw.transactionStatus = "APPROVED";
-  withdraw.processingTime = new Date();
-  await withdraw.save();
+    const user = await User_Model.findOne({ userId: withdraw.userId }).session(
+      session
+    );
 
-  // ✅ Deduct frozen amount permanently
-  await User_Model.updateOne(
-    { userId: withdraw.userId },
-    {
-      $inc: {},
-    }
-  );
+    if (withdraw.transactionStatus !== "PENDING")
+      throw new Error("This Withdrawal request already processed");
 
-  return withdraw;
+    // ✅ Update withdraw status
+    withdraw.transactionStatus = "APPROVED";
+    withdraw.processingTime = new Date();
+    await withdraw.save({ session });
+
+    // ✅ Deduct frozen amount permanently
+    await User_Model.updateOne(
+      { userId: withdraw.userId },
+      {
+        $inc: {}, // keeping your logic as-is
+      },
+      { session }
+    );
+
+    // ✅ Create history
+    await HistoryModel.create(
+      [
+        {
+          userId: user?._id,
+          historyType: "withdraw",
+          amount: withdraw.actualAmount,
+          time: new Date(),
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return withdraw;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 const rejectWithdrawService = async (
@@ -126,7 +158,6 @@ const getAllWithdrawsService = async (page = 1, limit = 10) => {
 
   return {
     data,
-   
   };
 };
 
@@ -143,7 +174,6 @@ const getSingleUserWithdraws = async (userId: number, page = 1, limit = 10) => {
 
   return {
     data,
-   
   };
 };
 

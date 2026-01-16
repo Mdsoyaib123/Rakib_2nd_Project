@@ -175,7 +175,7 @@ const enableOrderRound = async (
         "orderRound.round": round,
         "orderRound.status": status,
         quantityOfOrders: user?.quantityOfOrders === 0 ? 25 : user?.quantityOfOrders, // admin decides quantity
-        completedOrdersCount: user?.completedOrdersCount === 0 ? 0 : user?.completedOrdersCount,
+        completedOrdersCount: user?.completedOrdersCount === 25 ? 0 : user?.completedOrdersCount,
       },
     },
     { new: true }

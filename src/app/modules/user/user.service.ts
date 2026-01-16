@@ -4,7 +4,6 @@ import { ProductModel } from "../product/product.model";
 import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
-import { th } from "zod/v4/locales";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
@@ -139,9 +138,9 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
   const user: any = await User_Model.findOne({ userId });
   if (!user) throw new Error("User not found");
 
-  if (user.orderRound.round !== "trial" && !user.orderRound.status) {
-    throw new Error("All order rounds completed. Now recharge fast!");
-  }
+  // if (user.orderRound.round !== "trial" && !user.orderRound.status) {
+  //   throw new Error("All order rounds completed. Now recharge fast!");
+  // }
 
   // ✅ Set deposit type and unlock first deposit round, but user can't order yet
   return await User_Model.findOneAndUpdate(
@@ -174,8 +173,10 @@ const enableOrderRound = async (
       $set: {
         "orderRound.round": round,
         "orderRound.status": status,
-        quantityOfOrders: user?.quantityOfOrders === 0 ? 25 : user?.quantityOfOrders, // admin decides quantity
-        completedOrdersCount: user?.completedOrdersCount === 25 ? 0 : user?.completedOrdersCount,
+        quantityOfOrders:
+          user?.quantityOfOrders === 0 ? 25 : user?.quantityOfOrders, // admin decides quantity
+        completedOrdersCount:
+          user?.completedOrdersCount === 25 ? 0 : user?.completedOrdersCount,
       },
     },
     { new: true }
@@ -214,6 +215,12 @@ const updateUserSelectedPackageAmount = async (
   userId: number,
   amount: number
 ) => {
+  const user: any = await User_Model.findOne({ userId: userId });
+
+  if (user?.userBalance < amount) {
+    throw new Error("Insufficient balance, please recharge first");
+  }
+
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { userSelectedPackage: amount },
@@ -450,7 +457,7 @@ const purchaseOrder = async (userId: number) => {
     isAdminAssigned = true;
   } else {
     const products = await ProductModel.aggregate([
-      { $match: { price: { $lte: user.userBalance } } },
+      { $match: { price: { $lte: user?.userSelectedPackage } } },
       { $sample: { size: 1 } },
     ]);
 
@@ -545,6 +552,16 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         completedOrderProducts: product.productId.toString(),
       },
     };
+    if (
+      user.quantityOfOrders === 1 &&
+      (user.orderRound.round === "trial" ||
+        user.orderRound.round === "round_two")
+    ) {
+      updateQuery.$set = {
+        userSelectedPackage: 0,
+        "orderRound.status": false,
+      };
+    }
 
     if (forcedProductRule) {
       updateQuery.$pull = {

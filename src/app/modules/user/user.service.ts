@@ -23,14 +23,20 @@ const createUser = async (payload: Partial<TUser>) => {
   payload.superiorUserName = superiorUserName as string;
 
   const ieExists = await User_Model.findOne({
-    phoneNumber: payload.phoneNumber,
-    email: payload.email,
+    $or: [{ email: payload.email }, { phoneNumber: payload.phoneNumber }],
   });
 
   if (ieExists) {
-    throw new Error("Phone number or email is already exists");
-  }
+    if (ieExists.email === payload.email) {
+      throw new Error("Email already exists. Please use a different email.");
+    }
 
+    if (ieExists.phoneNumber === payload.phoneNumber) {
+      throw new Error(
+        "Phone number already exists. Please use a different phone number."
+      );
+    }
+  }
   if (payload?.password) {
     const hashedPassword = await bcrypt.hash(payload.password, 10);
     payload.password = hashedPassword;

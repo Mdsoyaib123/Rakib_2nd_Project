@@ -4,9 +4,49 @@ import { user_services } from "./user.service";
 const createUser = async (req: Request, res: Response) => {
   try {
     const user = await user_services.createUser(req.body);
-    res.status(201).json({ success: true, data: user });
+
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: user,
+    });
   } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message });
+    // console.error("❌ Create User Error:", error);
+
+    // 🔹 MongoDB duplicate key error
+    if (error.code === 11000) {
+      if (error.keyPattern?.email) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already exists",
+        });
+      }
+
+      if (error.keyPattern?.phoneNumber) {
+        return res.status(409).json({
+          success: false,
+          message: "Phone number already exists",
+        });
+      }
+    }
+
+    // 🔹 Custom business logic errors
+    if (
+      error.message?.includes("exists") ||
+      error.message?.includes("not found") ||
+      error.message?.includes("Invalid")
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    // 🔹 Fallback (unexpected error)
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 

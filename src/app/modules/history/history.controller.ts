@@ -3,7 +3,10 @@ import { HistoryService } from "./hisory.service";
 
 const getAllHistory = async (req: Request, res: Response) => {
   try {
-    const histories = await HistoryService.getAllHistory(req.params.userId);
+    const histories = await HistoryService.getAllHistory(
+      req.params.userId,
+      req.query.historyType as string
+    );
 
     res.status(200).json({
       success: true,

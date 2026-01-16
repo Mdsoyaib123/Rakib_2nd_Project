@@ -1,8 +1,11 @@
 import { Types } from "mongoose";
 import { HistoryModel } from "./history.model";
 
-const getAllHistory = async (userId: string) => {
-  return await HistoryModel.find({ userId: userId }).sort({ time: -1 });
+const getAllHistory = async (userId: string, historyType: string) => {
+
+    const query = historyType ? { userId: userId, historyType: historyType } : { userId: userId };
+
+    return await HistoryModel.find(query);
 };
 
 export const HistoryService = {

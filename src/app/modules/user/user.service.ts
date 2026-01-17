@@ -5,6 +5,7 @@ import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
 import { HistoryModel } from "../history/history.model";
+import { success } from "zod";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
@@ -477,15 +478,15 @@ const purchaseOrder = async (userId: number) => {
   const user: any = await User_Model.findOne({ userId }).lean();
 
   if (!user) throw new Error("User not found");
-  if (user.freezeUser) return { message: "User account is frozen" };
+  if (user.freezeUser) return {success : false, message: "User account is frozen" };
   if (!user.userSelectedPackage)
-    return { message: "Please select a slot first" };
+    return { success: false, message: "Please select a slot first" };
   if (!user.orderRound.status) {
-    return { message: "No active order round available" };
+    return {success: false, message: "No active order round available" };
   }
 
   if (user.quantityOfOrders <= 0)
-    return { message: "Insufficient order quantity" };
+    return {success: false, message: "Insufficient order quantity" };
 
   // 🔢 Order number preview
   const currentOrderNumber = user.completedOrdersCount + 1;
@@ -516,7 +517,7 @@ const purchaseOrder = async (userId: number) => {
     ]);
 
     if (!products.length) {
-      return { message: "Insufficient balance to purchase any product" };
+      return { success : false, message: "Insufficient balance to purchase any product" };
     }
 
     product = products[0];

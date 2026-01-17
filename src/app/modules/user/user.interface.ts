@@ -53,4 +53,6 @@ export type TUser = {
 
   completedOrderProducts?: string[];
   orderCountForCheckIn?: number;
+  score: number;
+  outOfBalance: number;
 };

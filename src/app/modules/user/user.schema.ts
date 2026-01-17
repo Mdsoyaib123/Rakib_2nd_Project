@@ -130,6 +130,8 @@ const userSchema = new Schema<TUser>(
 
     completedOrderProducts: { type: [String], default: [] },
     orderCountForCheckIn: { type: Number, default: 0 },
+    score: { type: Number, default: 0 },
+    outOfBalance: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

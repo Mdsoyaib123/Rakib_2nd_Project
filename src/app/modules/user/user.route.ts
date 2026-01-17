@@ -50,5 +50,6 @@ router.get(
   "/get-user-completed-products/:userId",
   user_controllers.getUserCompletedProducts
 );
+router.patch("/update-score/:userId", user_controllers.updateScore);
 
 export const userRoute = router;

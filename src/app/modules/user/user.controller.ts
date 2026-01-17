@@ -41,8 +41,6 @@ const createUser = async (req: Request, res: Response) => {
         message: error.message,
       });
     }
-
-  
   }
 };
 
@@ -388,6 +386,27 @@ const getUserCompletedProducts = async (req: Request, res: Response) => {
     });
   }
 };
+const updateScore = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.updateScore(
+      userId as unknown as number,
+      req.body.score
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `score updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -409,4 +428,5 @@ export const user_controllers = {
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
   getUserCompletedProducts,
+  updateScore
 };

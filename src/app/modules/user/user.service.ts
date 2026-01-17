@@ -150,6 +150,14 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
     const user: any = await User_Model.findOne({ userId }).session(session);
     if (!user) throw new Error("User not found");
 
+    let newOutOfBalance = user?.outOfBalance || 0;
+
+    if (amount >= newOutOfBalance) {
+      newOutOfBalance = 0;
+    } else {
+      newOutOfBalance = amount - newOutOfBalance;
+    }
+
     const res = await User_Model.findOneAndUpdate(
       { userId },
       {
@@ -157,6 +165,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
           userDiopsitType: "deposit",
           "orderRound.round": "round_one",
           "orderRound.status": false, //
+          outOfBalance: newOutOfBalance,
         },
         $inc: {
           userBalance: amount,
@@ -478,38 +487,40 @@ const purchaseOrder = async (userId: number) => {
   const user: any = await User_Model.findOne({ userId }).lean();
 
   if (!user) throw new Error("User not found");
-  if (user.freezeUser) return {success : false, message: "User account is frozen" };
+  if (user.freezeUser)
+    return { success: false, message: "User account is frozen" };
   if (!user.userSelectedPackage)
     return { success: false, message: "Please select a slot first" };
   if (!user.orderRound.status) {
-    return {success: false, message: "No active order round available" };
+    return { success: false, message: "No active order round available" };
   }
 
   if (user.quantityOfOrders <= 0)
-    return {success: false, message: "Insufficient order quantity" };
+    return { success: false, message: "Insufficient order quantity" };
 
   // 🔢 Order number preview
   const currentOrderNumber = user.completedOrdersCount + 1;
 
   let product: any;
   let isAdminAssigned = false;
+  let outOfBalance = 0;
 
   const forcedProductRule = user.adminAssaignProductsOrRewards?.find(
     (rule: any) => rule.orderNumber === currentOrderNumber
   );
 
   if (forcedProductRule) {
-    product = await ProductModel.findOneAndUpdate(
-      {
-        productId: forcedProductRule.productId,
-      },
-      {},
-      { new: true }
-    ).lean();
-
+    product = await ProductModel.findOne({
+      productId: forcedProductRule.productId,
+    });
     // if (!product) throw new Error("Assigned product not found");
 
     isAdminAssigned = true;
+
+    // ✅ Calculate deficit
+    if (user.userBalance < product.price) {
+      outOfBalance = product.price - user.userBalance;
+    }
   } else {
     const products = await ProductModel.aggregate([
       { $match: { price: { $lte: user?.userSelectedPackage } } },
@@ -517,17 +528,21 @@ const purchaseOrder = async (userId: number) => {
     ]);
 
     if (!products.length) {
-      return { success : false, message: "Insufficient balance to purchase any product" };
+      return {
+        success: false,
+        message: "Insufficient balance to purchase any product",
+      };
     }
 
     product = products[0];
   }
+  await User_Model.updateOne({ userId }, { $set: { outOfBalance } });
 
   return {
     orderNumber: currentOrderNumber,
     product,
     isAdminAssigned,
-    outOfBalance: forcedProductRule ? user.userBalance - product.price : null,
+    outOfBalance: outOfBalance,
     mysteryboxMethod: forcedProductRule?.mysterybox?.method
       ? forcedProductRule?.mysterybox?.method
       : null,
@@ -681,6 +696,14 @@ const getUserCompletedProducts = async (userId: number) => {
 
   return result;
 };
+const updateScore = async (userId: number, payload: any) => {
+  console.log("userId and score ", userId, payload);
+  return await User_Model.findOneAndUpdate(
+    { userId: userId },
+    { score: payload },
+    { new: true }
+  );
+};
 
 export const user_services = {
   createUser,
@@ -703,4 +726,5 @@ export const user_services = {
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
   getUserCompletedProducts,
+  updateScore,
 };

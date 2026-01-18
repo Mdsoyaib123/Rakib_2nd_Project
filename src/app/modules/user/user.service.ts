@@ -262,21 +262,15 @@ const updateUserSelectedPackageAmount = async (
     throw new Error("Insufficient balance, please recharge first");
   }
 
-  if (
-    (user?.orderRound.round === "trial" &&
-      user?.orderRound.status === false &&
-      user?.quantityOfOrders > 0) ||
-    (user?.orderRound.round === "round_two" &&
-      user?.orderRound.status === false &&
-      user?.quantityOfOrders > 0)
-  ) {
-    {
-      return {
-        success: false,
-        message:
-          "please withdraw your money frist , then select another package",
-      };
-    }
+  const isBlockedRound =
+    user.orderRound.round !== "round_one" &&
+    user.orderRound.status === false &&
+    user.quantityOfOrders > 0;
+
+  if (isBlockedRound) {
+    throw new Error(
+      "Please withdraw your money first, then select another package",
+    );
   }
 
   const updatedUser = await User_Model.findOneAndUpdate(

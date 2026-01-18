@@ -263,9 +263,12 @@ const updateUserSelectedPackageAmount = async (
   }
 
   if (
-    user?.orderRound.round === "round_two" &&
-    user?.orderRound.status === false &&
-    user?.quantityOfOrders > 0
+    (user?.orderRound.round === "trial" &&
+      user?.orderRound.status === false &&
+      user?.quantityOfOrders > 0) ||
+    (user?.orderRound.round === "round_two" &&
+      user?.orderRound.status === false &&
+      user?.quantityOfOrders > 0)
   ) {
     {
       return {

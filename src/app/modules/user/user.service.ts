@@ -35,7 +35,7 @@ const createUser = async (payload: Partial<TUser>) => {
 
     if (ieExists.phoneNumber === payload.phoneNumber) {
       throw new Error(
-        "Phone number already exists. Please use a different phone number."
+        "Phone number already exists. Please use a different phone number.",
       );
     }
   }
@@ -138,7 +138,7 @@ const freezeUser = async (id: number, isFreeze: boolean) => {
   return await User_Model.findOneAndUpdate(
     { userId: id },
     { freezeUser: isFreeze },
-    { new: true }
+    { new: true },
   );
 };
 
@@ -172,7 +172,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
           memberTotalRecharge: amount,
         },
       },
-      { new: true, session }
+      { new: true, session },
     );
 
     // ✅ Record history
@@ -186,7 +186,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
             time: new Date(),
           },
         ],
-        { session }
+        { session },
       );
     }
 
@@ -204,7 +204,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
 const enableOrderRound = async (
   userId: number,
   round: "round_one" | "round_two",
-  status: boolean
+  status: boolean,
 ) => {
   const user = await User_Model.findOne({ userId });
   if (!user) throw new Error("User not found");
@@ -220,7 +220,7 @@ const enableOrderRound = async (
           user?.completedOrdersCount === 25 ? 0 : user?.completedOrdersCount,
       },
     },
-    { new: true }
+    { new: true },
   );
 };
 
@@ -233,17 +233,17 @@ const decreaseUserBalance = async (id: number, amount: number) => {
       userBalance: newBalance,
       memberTotalRecharge: (user?.memberTotalRecharge || 0) - amount,
     },
-    { new: true }
+    { new: true },
   );
 };
 const updateUserOrderAmountSlot = async (
   userId: number,
-  amount: number | number[]
+  amount: number | number[],
 ) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: Number(userId) },
     { userOrderAmountSlot: amount },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedUser) {
@@ -254,7 +254,7 @@ const updateUserOrderAmountSlot = async (
 };
 const updateUserSelectedPackageAmount = async (
   userId: number,
-  amount: number
+  amount: number,
 ) => {
   const user: any = await User_Model.findOne({ userId: userId });
 
@@ -265,7 +265,7 @@ const updateUserSelectedPackageAmount = async (
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { userSelectedPackage: amount },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedUser) {
@@ -277,12 +277,12 @@ const updateUserSelectedPackageAmount = async (
 const updateQuantityOfOrders = async (
   userId: number,
   round: string,
-  status: boolean
+  status: boolean,
 ) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { "orderRound.round": round, "orderRound.status": status },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedUser) {
@@ -297,7 +297,7 @@ const updateAdminAssaignProduct = async (
   productId?: number,
   orderNumber?: number,
   mysteryboxMethod?: string,
-  mysteryboxAmount?: string
+  mysteryboxAmount?: string,
 ) => {
   try {
     // 🔹 CASE 1: Product + orderNumber exists
@@ -323,12 +323,12 @@ const updateAdminAssaignProduct = async (
             },
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedUser) {
         throw new Error(
-          `Order number ${orderNumber} already assigned or user not found`
+          `Order number ${orderNumber} already assigned or user not found`,
         );
       }
 
@@ -354,7 +354,7 @@ const updateAdminAssaignProduct = async (
             mysteryReward: mysteryboxAmount,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedUser) {
@@ -391,7 +391,7 @@ const removeMysteryReward = async (userId: number) => {
         },
         $unset: { mysteryReward: 0 },
       },
-      { new: true }
+      { new: true },
     );
 
     return updatedUser;
@@ -453,7 +453,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
           "dailyCheckInReward.lastCheckInDate": new Date(),
         },
       },
-      { new: true, session }
+      { new: true, session },
     );
 
     // ✅ Add history
@@ -467,7 +467,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
             time: new Date(),
           },
         ],
-        { session }
+        { session },
       );
     }
 
@@ -485,6 +485,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
 
 const purchaseOrder = async (userId: number) => {
   const user: any = await User_Model.findOne({ userId }).lean();
+  console.log("user", user);
 
   if (!user) throw new Error("User not found");
   if (user.freezeUser)
@@ -506,7 +507,7 @@ const purchaseOrder = async (userId: number) => {
   let outOfBalance = 0;
 
   const forcedProductRule = user.adminAssaignProductsOrRewards?.find(
-    (rule: any) => rule.orderNumber === currentOrderNumber
+    (rule: any) => rule.orderNumber === currentOrderNumber,
   );
 
   if (forcedProductRule) {
@@ -518,14 +519,23 @@ const purchaseOrder = async (userId: number) => {
     isAdminAssigned = true;
 
     // ✅ Calculate deficit
-    if (user.userBalance < product.price) {
-      outOfBalance = product.price - user.userBalance;
+    if (user.userBalance < product?.price) {
+      outOfBalance = product?.price - user.userBalance;
     }
   } else {
     const products = await ProductModel.aggregate([
       { $match: { price: { $lte: user?.userSelectedPackage } } },
       { $sample: { size: 1 } },
     ]);
+
+    const productCommisionTenpercent =
+      forcedProductRule?.mysterybox?.method === "cash"
+        ? Number(forcedProductRule?.mysterybox?.amount)
+        : forcedProductRule?.mysterybox?.method === "12x"
+          ? product?.price / 2
+          : (product?.price * 10) / 100;
+
+    console.log("ten persent", productCommisionTenpercent);
 
     if (!products.length) {
       return {
@@ -536,6 +546,18 @@ const purchaseOrder = async (userId: number) => {
 
     product = products[0];
   }
+
+  console.log("product", product);
+
+  const productCommisionTenpercent =
+    forcedProductRule?.mysterybox?.method === "cash"
+      ? Number(forcedProductRule?.mysterybox?.amount)
+      : forcedProductRule?.mysterybox?.method === "12x"
+        ? product?.price / 2
+        : (product?.price * 10) / 100;
+
+  console.log("ten persent", productCommisionTenpercent);
+
   await User_Model.updateOne({ userId }, { $set: { outOfBalance } });
 
   return {
@@ -549,6 +571,9 @@ const purchaseOrder = async (userId: number) => {
     mysteryboxAmount: forcedProductRule?.mysterybox?.amount
       ? forcedProductRule?.mysterybox?.amount
       : null,
+    commission: forcedProductRule
+      ? productCommisionTenpercent
+      : product.commission,
   };
 };
 
@@ -563,7 +588,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       await User_Model.updateOne(
         { userId },
         { $set: { "orderRound.status": false } },
-        { session }
+        { session },
       );
     }
 
@@ -591,15 +616,15 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     let forcedProductRule: any = null;
 
     forcedProductRule = user.adminAssaignProductsOrRewards?.find(
-      (rule: any) => rule.orderNumber === currentOrderNumber
+      (rule: any) => rule.orderNumber === currentOrderNumber,
     );
 
     const productCommisionTenpercent =
       forcedProductRule?.mysterybox?.method === "cash"
         ? Number(forcedProductRule?.mysterybox?.amount)
         : forcedProductRule?.mysterybox?.method === "12x"
-        ? product.price / 2
-        : (product.price * 10) / 100;
+          ? product.price / 2
+          : (product.price * 10) / 100;
 
     console.log("ten persent", productCommisionTenpercent);
     console.log("prodcut commision", product.commission);
@@ -645,7 +670,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       await ProductModel.updateOne(
         { productId: product.productId },
         { $set: { isAdminAssigned: false } },
-        { session }
+        { session },
       );
     }
 
@@ -668,7 +693,7 @@ const updateWithdrawalAddress = async (userId: number, payload: any) => {
   return await User_Model.findOneAndUpdate(
     { userId: userId },
     { withdrawalAddressAndMethod: payload },
-    { new: true }
+    { new: true },
   );
 };
 const getUserCompletedProducts = async (userId: number) => {
@@ -701,7 +726,7 @@ const updateScore = async (userId: number, payload: any) => {
   return await User_Model.findOneAndUpdate(
     { userId: userId },
     { score: payload },
-    { new: true }
+    { new: true },
   );
 };
 

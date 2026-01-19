@@ -163,7 +163,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
       {
         $set: {
           userDiopsitType: "deposit",
-          "orderRound.round": "round_one",
+          "orderRound.round": user.orderRound.round,
           "orderRound.status": false, //
           outOfBalance: newOutOfBalance,
         },

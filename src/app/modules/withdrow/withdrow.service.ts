@@ -10,23 +10,32 @@ type CreateWithdrawPayload = {
 
 const createWithdrawService = async (payload: CreateWithdrawPayload) => {
   const { userId, amount } = payload;
-  const MIN_WITHDRAW_AMOUNT = 1000;
+
   const user = await User_Model.findOne({ userId });
 
   if (!user) throw new Error("User not found");
   if (user.freezeUser) throw new Error("User account is frozen");
   if (user?.freezeWithdraw)
     throw new Error("Your withdrawal is frozen , please contact admin support");
+
+  if (user?.orderRound?.round === "trial" && user?.quantityOfOrders !== 0) {
+    throw new Error("You can't withdraw before complete trial orders");
+  }
+
+  if (user?.orderRound?.round === "round_one") {
+    throw new Error("You can't withdraw before complete two round orders");
+  }
+
+  if (user?.orderRound?.round === "round_two" && user?.quantityOfOrders !== 0) {
+    throw new Error("You can't withdraw before complete all orders");
+  }
+
   if (
     !user.withdrawalAddressAndMethod ||
     !user.withdrawalAddressAndMethod.BankName ||
     !user.withdrawalAddressAndMethod.withdrawalAddress
   ) {
     throw new Error("Please add withdrawal address first");
-  }
-
-  if (amount < MIN_WITHDRAW_AMOUNT) {
-    throw new Error(`Minimum withdrawal amount is ${MIN_WITHDRAW_AMOUNT}`);
   }
 
   if (amount <= 0) throw new Error("Invalid withdrawal amount");

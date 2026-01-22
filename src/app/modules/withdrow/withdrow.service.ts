@@ -15,6 +15,8 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
 
   if (!user) throw new Error("User not found");
   if (user.freezeUser) throw new Error("User account is frozen");
+  if (user?.freezeWithdraw)
+    throw new Error("Your withdrawal is frozen , please contact admin support");
   if (
     !user.withdrawalAddressAndMethod ||
     !user.withdrawalAddressAndMethod.BankName ||
@@ -60,7 +62,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
         userBalance: -amount,
         memberTotalWithdrawal: +amount,
       },
-    }
+    },
   );
 
   return withdraw;
@@ -74,7 +76,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
     if (!withdraw) throw new Error("Withdrawal not found");
 
     const user = await User_Model.findOne({ userId: withdraw.userId }).session(
-      session
+      session,
     );
 
     if (withdraw.transactionStatus !== "PENDING")
@@ -91,7 +93,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
       {
         $inc: {}, // keeping your logic as-is
       },
-      { session }
+      { session },
     );
 
     // ✅ Create history
@@ -104,7 +106,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
           time: new Date(),
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -120,7 +122,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
 
 const rejectWithdrawService = async (
   withdrawId: string,
-  reviewRemark?: string
+  reviewRemark?: string,
 ) => {
   const withdraw = await Withdraw_Model.findById(withdrawId);
 
@@ -142,7 +144,7 @@ const rejectWithdrawService = async (
         userBalance: withdraw.withdrawalAmount,
         memberTotalWithdrawal: -withdraw.withdrawalAmount,
       },
-    }
+    },
   );
 
   return withdraw;

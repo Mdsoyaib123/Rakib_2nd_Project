@@ -65,7 +65,9 @@ const userSchema = new Schema<TUser>(
     actualCompletedNumberToday: { type: Number, default: 0 },
 
     userBalance: { type: Number, required: true, default: 0 },
+    trialRoundBalance: { type: Number, default: 0 },
     dailyProfit: { type: Number, default: 0 },
+    freezeWithdraw: { type: Boolean, default: false },
     memberTotalRecharge: { type: Number, default: 0 },
     memberTotalWithdrawal: { type: Number, default: 0 },
 
@@ -133,7 +135,7 @@ const userSchema = new Schema<TUser>(
     score: { type: Number, default: 0 },
     outOfBalance: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User_Model = mongoose.model<TUser>("User", userSchema);

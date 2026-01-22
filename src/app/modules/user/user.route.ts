@@ -51,5 +51,6 @@ router.get(
   user_controllers.getUserCompletedProducts
 );
 router.patch("/update-score/:userId", user_controllers.updateScore);
+router.patch("/udpate-freeze-withdraw/:userId", user_controllers.udpateFreezeWithdraw);
 
 export const userRoute = router;

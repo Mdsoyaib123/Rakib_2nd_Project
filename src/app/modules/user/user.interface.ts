@@ -24,7 +24,9 @@ export type TUser = {
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;
   userBalance: number;
+  trialRoundBalance?: number;
   dailyProfit?: number;
+  freezeWithdraw?: boolean;
   memberTotalRecharge?: number;
   memberTotalWithdrawal?: number;
   userOrderFreezingAmount?: number;

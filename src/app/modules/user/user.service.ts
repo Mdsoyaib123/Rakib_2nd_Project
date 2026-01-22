@@ -48,7 +48,8 @@ const createUser = async (payload: Partial<TUser>) => {
 
   payload.quantityOfOrders = 25; // Trial round orders
   payload.userDiopsitType = "trial";
-  payload.userBalance = 10000;
+  payload.userBalance = 0;
+  payload.trialRoundBalance = 10000;
   payload.userSelectedPackage = 10000;
   payload.orderRound = {
     round: "trial",
@@ -308,11 +309,26 @@ const updateAdminAssaignProduct = async (
   userId: number,
   productId?: number,
   orderNumber?: number,
-  mysteryboxMethod?: string,
+  mysteryboxMethod?: "cash" | "12x",
   mysteryboxAmount?: string,
 ) => {
   try {
-    // 🔹 CASE 1: Product + orderNumber exists
+    // 🔴 Order number is mandatory for any mysterybox
+    if (mysteryboxMethod && !orderNumber) {
+      throw new Error("Order number is required for mysterybox");
+    }
+
+    // 🔴 12x MUST have product
+    if (mysteryboxMethod === "12x" && !productId) {
+      throw new Error("Product is required for 12x mysterybox");
+    }
+
+    // 🔴 CASH must NOT have product
+    if (mysteryboxMethod === "cash" && productId) {
+      throw new Error("Product is not allowed for cash mysterybox");
+    }
+
+    // 🔹 CASE 1: Product + orderNumber (optional mysterybox)
     if (productId && orderNumber) {
       const updatedUser = await User_Model.findOneAndUpdate(
         {
@@ -347,41 +363,43 @@ const updateAdminAssaignProduct = async (
       return updatedUser;
     }
 
-    if (
-      mysteryboxMethod === "12x" &&
-      mysteryboxAmount &&
-      !productId &&
-      !orderNumber
-    ) {
-      throw new Error("Product or order number is required for 12x mysterybox");
-    }
-
-    // 🔹 CASE 2: ONLY mysterybox (no product, no order)
-
-    if (mysteryboxMethod === "cash" && mysteryboxAmount) {
+    // 🔹 CASE 2: CASH mysterybox (order-based, NO product)
+    if (mysteryboxMethod === "cash" && mysteryboxAmount && orderNumber) {
       const updatedUser = await User_Model.findOneAndUpdate(
-        { userId },
         {
-          $set: {
-            mysteryReward: mysteryboxAmount,
+          userId,
+          "adminAssaignProductsOrRewards.orderNumber": { $ne: orderNumber },
+        },
+        {
+          $push: {
+            adminAssaignProductsOrRewards: {
+              orderNumber,
+              mysterybox: {
+                method: "cash",
+                amount: mysteryboxAmount,
+              },
+            },
           },
         },
         { new: true },
       );
 
       if (!updatedUser) {
-        throw new Error("User not found");
+        throw new Error(
+          `Order number ${orderNumber} already assigned or user not found`,
+        );
       }
 
       return updatedUser;
     }
+
+    throw new Error("Invalid assignment payload");
   } catch (error: any) {
     console.error("❌ Error in updateAdminAssaignProduct:", error.message);
-
-    // Re-throw for controller to handle
     throw new Error(error.message || "Failed to assign product or reward");
   }
 };
+
 const removeMysteryReward = async (userId: number) => {
   try {
     if (!userId) {
@@ -540,15 +558,6 @@ const purchaseOrder = async (userId: number) => {
       { $sample: { size: 1 } },
     ]);
 
-    const productCommisionTenpercent =
-      forcedProductRule?.mysterybox?.method === "cash"
-        ? Number(forcedProductRule?.mysterybox?.amount)
-        : forcedProductRule?.mysterybox?.method === "12x"
-          ? product?.price / 2
-          : (product?.price * 10) / 100;
-
-    console.log("ten persent", productCommisionTenpercent);
-
     if (!products.length) {
       return {
         success: false,
@@ -618,12 +627,24 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     if (!product) throw new Error("Product not found");
 
-    if (user.userBalance < product.price)
+    // if (user.userBalance < product.price)
+    //   return {
+    //     success: false,
+    //     message:
+    //       "Insufficient balance to purchase this product.please contact to admin supports",
+    //   };
+
+    if (
+      (user.userDiopsitType === "trial"
+        ? user.trialRoundBalance
+        : user.userBalance) < product.price
+    ) {
       return {
         success: false,
         message:
-          "Insufficient balance to purchase this product.please contact to admin supports",
+          "Insufficient balance to purchase this product. Please contact admin support",
       };
+    }
 
     let forcedProductRule: any = null;
 
@@ -635,11 +656,11 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       forcedProductRule?.mysterybox?.method === "cash"
         ? Number(forcedProductRule?.mysterybox?.amount)
         : forcedProductRule?.mysterybox?.method === "12x"
-          ? product.price / 2
-          : (product.price * 10) / 100;
+          ? (product.price * 48) / 100
+          : (product.price * 12.8) / 100;
 
-    console.log("ten persent", productCommisionTenpercent);
-    console.log("prodcut commision", product.commission);
+    // console.log("ten persent", productCommisionTenpercent);
+    // console.log("prodcut commision", product.commission);
 
     // ✅ SAME UPDATE LOGIC
     const updateQuery: any = {
@@ -677,6 +698,19 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     }
 
     await User_Model.updateOne({ userId }, updateQuery, { session });
+
+    const updatedUser = await User_Model.findOne({ userId }).session(session);
+
+    if (
+      updatedUser?.userDiopsitType === "trial" &&
+      updatedUser?.quantityOfOrders === 0
+    ) {
+      await User_Model.updateOne(
+        { userId },
+        { $set: { trialRoundBalance: 0 } },
+        { session },
+      );
+    }
 
     if (product.isAdminAssigned) {
       await ProductModel.updateOne(
@@ -741,6 +775,33 @@ const updateScore = async (userId: number, payload: any) => {
     { new: true },
   );
 };
+const udpateFreezeWithdraw = async (userId: number, payload: boolean) => {
+  console.log("payload", payload);
+  try {
+    if (typeof payload !== "boolean") {
+      throw new Error("freezeWithdraw must be a boolean value");
+    }
+
+    const updatedUser = await User_Model.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          freezeWithdraw: payload,
+        },
+      },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    return updatedUser;
+  } catch (error: any) {
+    console.error("❌ Error updating freezeWithdraw:", error.message);
+    throw new Error(error.message || "Failed to update freezeWithdraw");
+  }
+};
 
 export const user_services = {
   createUser,
@@ -764,4 +825,5 @@ export const user_services = {
   updateWithdrawalAddress,
   getUserCompletedProducts,
   updateScore,
+  udpateFreezeWithdraw,
 };

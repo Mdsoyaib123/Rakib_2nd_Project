@@ -72,7 +72,7 @@ const getAllUsers = async (req: Request, res: Response) => {
 const getUserByUserId = async (req: Request, res: Response) => {
   try {
     const user = await user_services.getUserByUserId(
-      req.params.userId as unknown as number
+      req.params.userId as unknown as number,
     );
     if (!user) {
       return res
@@ -107,7 +107,7 @@ const freezeUser = async (req: Request, res: Response) => {
   try {
     await user_services.freezeUser(
       req.params.userId as unknown as number,
-      req.body.isFreeze
+      req.body.isFreeze,
     );
     res.json({
       success: true,
@@ -121,7 +121,7 @@ const rechargeUserBalance = async (req: Request, res: Response) => {
   try {
     const result = await user_services.rechargeUserBalance(
       req.params.userId as unknown as number,
-      req.body.amount
+      req.body.amount,
     );
     res.json({
       success: true,
@@ -138,7 +138,7 @@ const enableOrderRound = async (req: Request, res: Response) => {
     const result = await user_services.enableOrderRound(
       req.params.userId as unknown as number,
       round,
-      status
+      status,
     );
     res.json({
       success: true,
@@ -154,7 +154,7 @@ const decreaseUserBalance = async (req: Request, res: Response) => {
   try {
     const result = await user_services.decreaseUserBalance(
       req.params.userId as unknown as number,
-      req.body.amount
+      req.body.amount,
     );
     res.json({
       success: true,
@@ -173,7 +173,7 @@ const updateUserOrderAmountSlot = async (req: Request, res: Response) => {
 
     const result = await user_services.updateUserOrderAmountSlot(
       userId as unknown as number,
-      amount
+      amount,
     );
 
     res.status(200).json({
@@ -195,7 +195,7 @@ const updateUserSelectedPackageAmount = async (req: Request, res: Response) => {
 
     const result = await user_services.updateUserSelectedPackageAmount(
       userId as unknown as number,
-      amount
+      amount,
     );
 
     res.status(200).json({
@@ -218,7 +218,7 @@ const updateQuantityOfOrders = async (req: Request, res: Response) => {
     const result = await user_services.updateQuantityOfOrders(
       userId as unknown as number,
       quantity,
-      status
+      status,
     );
 
     res.status(200).json({
@@ -244,7 +244,7 @@ const updateAdminAssaignProduct = async (req: Request, res: Response) => {
       productId,
       orderNumber,
       mysteryboxMethod,
-      mysteryboxAmount
+      mysteryboxAmount,
     );
 
     res.status(200).json({
@@ -264,7 +264,7 @@ const removeMysteryReward = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const result = await user_services.removeMysteryReward(
-      userId as unknown as number
+      userId as unknown as number,
     );
 
     res.status(200).json({
@@ -287,7 +287,7 @@ const addCheckInReward = async (req: Request, res: Response) => {
 
     const result = await user_services.addCheckInReward(
       userId as unknown as number,
-      checkInAmount as unknown as number
+      checkInAmount as unknown as number,
     );
 
     res.status(200).json({
@@ -307,7 +307,7 @@ const purchaseOrder = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const result = await user_services.purchaseOrder(
-      userId as unknown as number
+      userId as unknown as number,
     );
 
     res.status(200).json({
@@ -328,7 +328,7 @@ const confirmedPurchaseOrder = async (req: Request, res: Response) => {
 
     const result = await user_services.confirmedPurchaseOrder(
       userId as unknown as number,
-      productId as unknown as number
+      productId as unknown as number,
     );
 
     res.status(200).json({
@@ -351,7 +351,7 @@ const updateWithdrawalAddress = async (req: Request, res: Response) => {
 
     const result = await user_services.updateWithdrawalAddress(
       userId as unknown as number,
-      payload
+      payload,
     );
 
     res.status(200).json({
@@ -371,7 +371,7 @@ const getUserCompletedProducts = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const result = await user_services.getUserCompletedProducts(
-      userId as unknown as number
+      userId as unknown as number,
     );
 
     res.status(200).json({
@@ -392,12 +392,33 @@ const updateScore = async (req: Request, res: Response) => {
 
     const result = await user_services.updateScore(
       userId as unknown as number,
-      req.body.score
+      req.body.score,
     );
 
     res.status(200).json({
       success: true,
       message: `score updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const udpateFreezeWithdraw = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.udpateFreezeWithdraw(
+      userId as unknown as number,
+      req.body.freezeWithdraw,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `withdraw freeze updated successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -428,5 +449,6 @@ export const user_controllers = {
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
   getUserCompletedProducts,
-  updateScore
+  updateScore,
+  udpateFreezeWithdraw
 };

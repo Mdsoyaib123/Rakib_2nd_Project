@@ -11,8 +11,13 @@ const historySchema = new Schema<THistory>(
     },
     historyType: {
       type: String,
-      enum: ["withdraw", "recharge", "checkIn"],
+      enum: ["recharge", "checkIn"],
       required: true,
+    },
+    withdrawStatus: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "REJECTED"],
+      default: "PENDING",
     },
     amount: {
       type: Number,

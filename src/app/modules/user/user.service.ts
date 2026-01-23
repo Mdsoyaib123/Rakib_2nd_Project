@@ -736,12 +736,42 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 };
 
 const updateWithdrawalAddress = async (userId: number, payload: any) => {
+  const { withdrawMethod } = payload;
+
+  if (!withdrawMethod) {
+    throw new Error("withdrawMethod is required");
+  }
+
+  let cleanedPayload: any = {
+    name: payload.name,
+    withdrawMethod,
+  };
+
+  if (withdrawMethod === "BankTransfer") {
+    cleanedPayload = {
+      ...cleanedPayload,
+      bankName: payload.bankName,
+      bankAccountNumber: payload.bankAccountNumber,
+      branchName: payload.branchName,
+      district: payload.district,
+    };
+  }
+
+  if (withdrawMethod === "MobileBanking") {
+    cleanedPayload = {
+      ...cleanedPayload,
+      mobileBankingName: payload.mobileBankingName,
+      mobileBankingAccountNumber: payload.mobileBankingAccountNumber,
+    };
+  }
+
   return await User_Model.findOneAndUpdate(
-    { userId: userId },
-    { withdrawalAddressAndMethod: payload },
-    { new: true },
+    { userId },
+    { $set: { withdrawalAddressAndMethod: cleanedPayload } },
+    { new: true, runValidators: true },
   );
 };
+
 const getUserCompletedProducts = async (userId: number) => {
   const user = await User_Model.findOne({ userId }).lean();
 

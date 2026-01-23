@@ -20,9 +20,6 @@ const withdrawSchema = new Schema<TWithdraw>(
     withdrawalAddress: { type: String, required: true },
 
     withdrawalAmount: { type: Number, required: true }, // before fee
-    withdrawalFee: { type: Number, required: true },
-    actualAmount: { type: Number, required: true }, // after fee
-
     totalRechargeAmount: { type: Number },
     totalWithdrawalAmount: { type: Number },
 

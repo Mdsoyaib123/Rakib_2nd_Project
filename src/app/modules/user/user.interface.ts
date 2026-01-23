@@ -18,8 +18,16 @@ export type TUser = {
   };
 
   withdrawalAddressAndMethod?: {
-    BankName: string;
-    withdrawalAddress: string;
+    name: string;
+    withdrawMethod: "MobileBanking" | "BankTransfer";
+    bankName?: string;
+    bankAccountNumber?: Number;
+    branchName?: string;
+    district?: string;
+
+    //mobile banking
+    mobileBankingName?: string;
+    mobileBankingAccountNumber?: Number;
   };
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;

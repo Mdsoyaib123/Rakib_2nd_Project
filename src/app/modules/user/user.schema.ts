@@ -56,11 +56,54 @@ const userSchema = new Schema<TUser>(
     completedOrdersCount: { type: Number, default: 0 },
     withdrawalAddressAndMethod: {
       type: {
-        BankName: { type: String },
-        withdrawalAddress: { type: String },
+        name: {
+          type: String,
+          required: true,
+        },
+
+        withdrawMethod: {
+          type: String,
+          enum: ["MobileBanking", "BankTransfer"],
+          required: true,
+        },
+
+        // Bank Transfer fields
+        bankName: {
+          type: String,
+          required: function () {
+            return this.withdrawMethod === "BankTransfer";
+          },
+        },
+        bankAccountNumber: {
+          type: Number,
+          required: function () {
+            return this.withdrawMethod === "BankTransfer";
+          },
+        },
+        branchName: {
+          type: String,
+        },
+        district: {
+          type: String,
+        },
+
+        // Mobile Banking fields
+        mobileBankingName: {
+          type: String,
+          required: function () {
+            return this.withdrawMethod === "MobileBanking";
+          },
+        },
+        mobileBankingAccountNumber: {
+          type: Number,
+          required: function () {
+            return this.withdrawMethod === "MobileBanking";
+          },
+        },
       },
       default: null,
     },
+
     withdrowalValidOddNumber: { type: Number, default: 0 },
     actualCompletedNumberToday: { type: Number, default: 0 },
 

@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+
 import { HistoryModel } from "./history.model";
 
 const getAllHistory = async (userId: string, historyType: string) => {

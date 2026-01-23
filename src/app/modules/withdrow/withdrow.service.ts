@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { HistoryModel } from "../history/history.model";
 import { User_Model } from "../user/user.schema";
 import { Withdraw_Model } from "./withdrow.model";
 
@@ -42,9 +41,9 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
 
   if (user.userBalance < amount) throw new Error("Insufficient balance");
 
-  // Example fee logic (customize)
-  const withdrawalFee = Math.floor(amount * 0.05); // 5%
-  const actualAmount = amount - withdrawalFee;
+  if (amount < 500) {
+    throw new Error("Minimum withdrawal amount is 500");
+  }
 
   // ✅ Create withdrawal record
   const withdraw = await Withdraw_Model.create({
@@ -55,8 +54,6 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
     BankName: user?.withdrawalAddressAndMethod?.BankName,
     withdrawalAddress: user?.withdrawalAddressAndMethod?.withdrawalAddress,
     withdrawalAmount: amount,
-    withdrawalFee,
-    actualAmount,
     totalRechargeAmount: user.memberTotalRecharge,
     totalWithdrawalAmount: user.memberTotalWithdrawal,
     transactionStatus: "PENDING",
@@ -105,18 +102,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
       { session },
     );
 
-    // ✅ Create history
-    await HistoryModel.create(
-      [
-        {
-          userId: user?._id,
-          historyType: "withdraw",
-          amount: withdraw.actualAmount,
-          time: new Date(),
-        },
-      ],
-      { session },
-    );
+
 
     await session.commitTransaction();
     session.endSession();

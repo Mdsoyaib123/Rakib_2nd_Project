@@ -7,8 +7,6 @@ export type TWithdraw = {
   BankName: string;
   withdrawalAddress: string;
   withdrawalAmount: number;
-  withdrawalFee: number;
-  actualAmount: number;
   totalRechargeAmount: number;
   totalWithdrawalAmount: number;
   applicationTime: Date;

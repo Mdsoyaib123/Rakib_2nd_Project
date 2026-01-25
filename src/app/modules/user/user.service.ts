@@ -540,7 +540,9 @@ const purchaseOrder = async (userId: number) => {
     (rule: any) => rule.orderNumber === currentOrderNumber,
   );
 
-  if (forcedProductRule) {
+  console.log("forcedProductRule", forcedProductRule);
+
+  if (forcedProductRule.mysterybox?.method === "12x") {
     product = await ProductModel.findOne({
       productId: forcedProductRule.productId,
     });

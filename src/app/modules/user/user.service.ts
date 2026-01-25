@@ -231,7 +231,6 @@ const decreaseUserBalance = async (id: number, amount: number) => {
     { userId: id },
     {
       userBalance: newBalance,
-      memberTotalRecharge: (user?.memberTotalRecharge || 0) - amount,
     },
     { new: true },
   );

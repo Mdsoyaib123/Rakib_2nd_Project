@@ -40,7 +40,7 @@ const updateProduct = async (productId: number, payload: Partial<TProduct>) => {
   const updatedProduct = await ProductModel.findOneAndUpdate(
     { productId: productId },
     payload,
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   if (!updatedProduct) {
@@ -49,21 +49,40 @@ const updateProduct = async (productId: number, payload: Partial<TProduct>) => {
 
   return updatedProduct;
 };
-// product.service.ts
 const getAllProducts = async (
   page = 1,
   limit = 10,
   name?: string,
-  productId?: string
+  productId?: string,
+  minPrice?: number,
+  maxPrice?: number,
 ) => {
   const query: any = {};
 
+  // Name search
   if (name) {
-    query.name = { $regex: name, $options: "i" }; // Case-insensitive regex search
+    query.name = { $regex: name, $options: "i" };
   }
 
+  // Product ID filter
   if (productId) {
     query.productId = Number(productId);
+  }
+
+  // ✅ Price range filter (safe)
+  if (
+    (typeof minPrice === "number" && !isNaN(minPrice)) ||
+    (typeof maxPrice === "number" && !isNaN(maxPrice))
+  ) {
+    query.price = {};
+
+    if (typeof minPrice === "number" && !isNaN(minPrice)) {
+      query.price.$gte = minPrice;
+    }
+
+    if (typeof maxPrice === "number" && !isNaN(maxPrice)) {
+      query.price.$lte = maxPrice;
+    }
   }
 
   const data = await ProductModel.find(query)
@@ -71,9 +90,7 @@ const getAllProducts = async (
     .limit(limit)
     .exec();
 
-  return {
-    data,
-  };
+  return { data };
 };
 
 const deleteProduct = async (productId: number) => {
@@ -84,11 +101,11 @@ const deleteProduct = async (productId: number) => {
   }
 
   return deletedProduct;
-}
+};
 
 export const ProductService = {
   createProduct,
   updateProduct,
   getAllProducts,
-  deleteProduct
+  deleteProduct,
 };

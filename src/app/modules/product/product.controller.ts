@@ -54,14 +54,25 @@ const updateProduct = async (req: Request, res: Response) => {
 const getAllProducts = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
-  const name = req.query.name as string;
-  const productId = req.query.productId as string;
+
+  const name = req.query.name as string | undefined;
+  const productId = req.query.productId as string | undefined;
+
+  const minPrice = req.query.minPrice
+    ? Number(req.query.minPrice)
+    : undefined;
+
+  const maxPrice = req.query.maxPrice
+    ? Number(req.query.maxPrice)
+    : undefined;
 
   const result = await ProductService.getAllProducts(
     page,
     limit,
     name,
-    productId
+    productId,
+    minPrice,
+    maxPrice
   );
 
   res.status(200).json({
@@ -69,10 +80,11 @@ const getAllProducts = async (req: Request, res: Response) => {
     data: result.data,
   });
 };
+
 const deleteProduct = async (req: Request, res: Response) => {
   const productId = req.params.productId as string;
   const result = await ProductService.deleteProduct(
-    productId as unknown as number
+    productId as unknown as number,
   );
 
   res.status(200).json({

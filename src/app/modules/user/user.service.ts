@@ -285,27 +285,6 @@ const updateUserSelectedPackageAmount = async (
     );
   }
 
-  //  const isBlockedRound =
-  //   user.orderRound.round !== "round_one" &&
-  //   user.orderRound.status === false &&
-  //   user.quantityOfOrders > 0;
-
-  // console.log("is blocked", isBlockedRound);
-
-  // if (
-  //   // (user?.orderRound.round === "trial" &&
-  //   //   user?.orderRound.status === false &&
-  //   //   user.quantityOfOrders > 0) ||
-  //   // (user?.orderRound.round === "round_two" &&
-  //   //   user?.orderRound.status === false &&
-  //   //   user.quantityOfOrders > 0)
-  //   !isBlockedRound
-  // ) {
-  //   throw new Error(
-  //     "Please withdraw your money first, then select another package",
-  //   );
-  // }
-
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { userSelectedPackage: amount },
@@ -588,17 +567,24 @@ const purchaseOrder = async (userId: number) => {
     if (user.userBalance < product?.price) {
       outOfBalance = product?.price - user.userBalance;
     }
+
+    await User_Model.updateOne(
+      {
+        userId,
+        "adminAssaignProductsOrRewards.orderNumber": currentOrderNumber,
+        "adminAssaignProductsOrRewards.mysterybox.seenTheReward": false,
+      },
+      {
+        $set: {
+          "adminAssaignProductsOrRewards.$.mysterybox.seenTheReward": true,
+        },
+      },
+    );
   } else if (
     forcedProductRule?.mysterybox?.method === "cash" &&
     forcedProductRule?.orderNumber &&
     !forcedProductRule?.productId
   ) {
-    // await User_Model.updateOne(
-    //   { userId },
-    //   { $inc: { userBalance: forcedProductRule.mysterybox.amount } },
-    // );
-    console.log("cash amount for userData updated");
-
     const products = await ProductModel.aggregate([
       { $match: { price: { $lte: user?.userSelectedPackage } } },
       { $sample: { size: 1 } },
@@ -612,6 +598,19 @@ const purchaseOrder = async (userId: number) => {
     }
 
     product = products[0];
+
+    await User_Model.updateOne(
+      {
+        userId,
+        "adminAssaignProductsOrRewards.orderNumber": currentOrderNumber,
+        "adminAssaignProductsOrRewards.mysterybox.seenTheReward": false,
+      },
+      {
+        $set: {
+          "adminAssaignProductsOrRewards.$.mysterybox.seenTheReward": true,
+        },
+      },
+    );
   } else if (
     !forcedProductRule?.mysterybox?.method &&
     !forcedProductRule?.mysterybox?.amount &&
@@ -671,6 +670,9 @@ const purchaseOrder = async (userId: number) => {
       : null,
     mysteryboxAmount: forcedProductRule?.mysterybox?.amount
       ? forcedProductRule?.mysterybox?.amount
+      : null,
+    seenTheReward: forcedProductRule?.mysterybox
+      ? forcedProductRule?.mysterybox?.seenTheReward
       : null,
     commission: forcedProductRule
       ? productCommisionTenpercent

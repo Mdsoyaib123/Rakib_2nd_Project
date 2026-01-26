@@ -12,7 +12,7 @@ import sendMail from "../../utils/mail_sender";
 
 const login_user_from_db = async (
   payload: TLoginPayload,
-  ipAddress: string
+  ipAddress: string,
 ) => {
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
@@ -21,19 +21,22 @@ const login_user_from_db = async (
   if (!isExistAccount) {
     throw new AppError("Account is   Not Found", httpStatus.NOT_FOUND);
   }
-  if (isExistAccount?.freezeUser === true  && isExistAccount?.role !== "admin") {
-    throw new AppError("Account is   Frozen", httpStatus.NOT_FOUND);
+  if (isExistAccount?.freezeUser === true && isExistAccount?.role !== "admin") {
+    throw new AppError(
+      "Your account is currently Frozen. Please contact customer service",
+      httpStatus.NOT_FOUND,
+    );
   }
   console.log("ip address 444", ipAddress);
 
   await User_Model.findOneAndUpdate(
     { phoneNumber: payload.phoneNumber },
-    { lastLoginIp: ipAddress, lastLoginTime: new Date() }
+    { lastLoginIp: ipAddress, lastLoginTime: new Date() },
   );
 
   const isPasswordMatch = await bcrypt.compare(
     payload.password,
-    isExistAccount.password
+    isExistAccount.password,
   );
 
   if (!isPasswordMatch) {
@@ -46,7 +49,7 @@ const login_user_from_db = async (
       role: isExistAccount.role,
     },
     configs.jwt.access_token_secret as Secret,
-    configs.jwt.access_token_expires as string
+    configs.jwt.access_token_expires as string,
   );
 
   // console.log("accessToken", accessToken);
@@ -57,14 +60,14 @@ const login_user_from_db = async (
       role: isExistAccount.role,
     },
     configs.jwt.refresh_token_secret as Secret,
-    configs.jwt.refresh_token_expires as string
+    configs.jwt.refresh_token_expires as string,
   );
   return {
     accessToken: accessToken,
     refreshToken: refreshToken,
     role: isExistAccount.role,
     userId: isExistAccount.userId,
-    user_id:isExistAccount._id
+    user_id: isExistAccount._id,
   };
 };
 
@@ -83,7 +86,7 @@ const refresh_token_from_db = async (token: string) => {
   try {
     decodedData = jwtHelpers.verifyToken(
       token,
-      configs.jwt.refresh_token_secret as Secret
+      configs.jwt.refresh_token_secret as Secret,
     );
   } catch (err) {
     throw new Error("You are not authorized!");
@@ -99,7 +102,7 @@ const refresh_token_from_db = async (token: string) => {
       role: userData!.role,
     },
     configs.jwt.access_token_secret as Secret,
-    configs.jwt.access_token_expires as string
+    configs.jwt.access_token_expires as string,
   );
 
   return { accessToken };
@@ -110,7 +113,7 @@ const change_password_from_db = async (
   payload: {
     oldPassword: string;
     newPassword: string;
-  }
+  },
 ) => {
   const isExistAccount = await User_Model.findOne({
     phoneNumber: user.phoneNumber,
@@ -121,7 +124,7 @@ const change_password_from_db = async (
 
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.oldPassword,
-    isExistAccount.password
+    isExistAccount.password,
   );
   if (!isCorrectPassword) {
     throw new AppError("Old password is incorrect", httpStatus.UNAUTHORIZED);
@@ -132,7 +135,7 @@ const change_password_from_db = async (
     { phoneNumber: isExistAccount.phoneNumber },
     {
       password: hashedPassword,
-    }
+    },
   );
   return "Password changed successful.";
 };
@@ -148,7 +151,7 @@ const forget_password_from_db = async (email: string) => {
       role: isAccountExists.role,
     },
     configs.jwt.reset_secret as Secret,
-    configs.jwt.reset_expires as string
+    configs.jwt.reset_expires as string,
   );
 
   const resetPasswordLink = `${configs.jwt.front_end_url}/reset?token=${resetToken}&email=${isAccountExists.email}`;
@@ -167,18 +170,18 @@ const forget_password_from_db = async (email: string) => {
 const reset_password_into_db = async (
   token: string,
   email: string,
-  newPassword: string
+  newPassword: string,
 ) => {
   let decodedData: JwtPayload;
   try {
     decodedData = jwtHelpers.verifyToken(
       token,
-      configs.jwt.reset_secret as Secret
+      configs.jwt.reset_secret as Secret,
     );
   } catch (err) {
     throw new AppError(
       "Your reset link is expire. Submit new link request!!",
-      httpStatus.UNAUTHORIZED
+      httpStatus.UNAUTHORIZED,
     );
   }
 
@@ -196,7 +199,7 @@ const reset_password_into_db = async (
     {
       password: hashedPassword,
       lastPasswordChange: Date(),
-    }
+    },
   );
   return "Password reset successfully!";
 };
@@ -205,7 +208,7 @@ const verified_account_into_db = async (token: string) => {
   try {
     const { email } = jwtHelpers.verifyToken(
       token,
-      configs.jwt.verified_token as string
+      configs.jwt.verified_token as string,
     );
     // check account is already verified or blocked
     const isExistAccount = await Account_Model.findOne({ email });
@@ -219,7 +222,7 @@ const verified_account_into_db = async (token: string) => {
     const result = await Account_Model.findOneAndUpdate(
       { email },
       { isVerified: true },
-      { new: true }
+      { new: true },
     );
 
     return result;
@@ -240,7 +243,7 @@ const get_new_verification_link_from_db = async (email: string) => {
       email,
     },
     configs.jwt.verified_token as Secret,
-    "5m"
+    "5m",
   );
   const verificationLink = `${configs.jwt.front_end_url}/verified?token=${verifiedToken}`;
   await sendMail({

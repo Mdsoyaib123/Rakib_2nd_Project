@@ -708,7 +708,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (
-      (user.orderRound.round === "trial"
+      (user.userDiopsitType === "trial"
         ? user.trialRoundBalance
         : user.userBalance) < product?.price
     ) {

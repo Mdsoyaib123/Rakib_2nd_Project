@@ -22,7 +22,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
     throw new Error("You can't withdraw before complete trial orders");
   }
 
-  if (user?.orderRound?.round === "round_one") {
+  if (user?.orderRound?.round === "round_one" && user?.userDiopsitType === "trial") {
     throw new Error("You can't withdraw before complete two round orders");
   }
 

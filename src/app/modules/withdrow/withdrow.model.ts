@@ -25,13 +25,13 @@ const withdrawSchema = new Schema<TWithdraw>(
     // Bank Transfer
     bankName: {
       type: String,
-      required: function () {
+      required: function (this: TWithdraw) {
         return this.withdrawMethod === "BankTransfer";
       },
     },
     bankAccountNumber: {
       type: Number,
-      required: function () {
+      required: function (this: TWithdraw) {
         return this.withdrawMethod === "BankTransfer";
       },
     },
@@ -41,13 +41,13 @@ const withdrawSchema = new Schema<TWithdraw>(
     // Mobile Banking
     mobileBankingName: {
       type: String,
-      required: function () {
+      required: function (this: TWithdraw) {
         return this.withdrawMethod === "MobileBanking";
       },
     },
     mobileBankingAccountNumber: {
       type: Number,
-      required: function () {
+      required: function (this: TWithdraw) {
         return this.withdrawMethod === "MobileBanking";
       },
     },

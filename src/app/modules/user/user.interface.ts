@@ -53,6 +53,7 @@ export type TUser = {
     mysterybox?: {
       method: "cash" | "12x";
       amount: string;
+      seenTheReward?: boolean;
     };
   }[];
   mysteryReward?: Number;

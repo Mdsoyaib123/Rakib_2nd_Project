@@ -143,6 +143,11 @@ const userSchema = new Schema<TUser>(
               amount: {
                 type: String,
               },
+              seenTheReward: {
+                type: Boolean,
+                default: false,
+                required : false
+              }
             },
             required: false, // ✅ optional
             default: undefined,

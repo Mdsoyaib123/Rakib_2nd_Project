@@ -922,6 +922,23 @@ const udpateFreezeWithdraw = async (userId: number, payload: boolean) => {
   }
 };
 
+const getUserWithdrawAddress = async (userId: number) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const user = await User_Model.findOne(
+    { userId },
+    { withdrawalAddressAndMethod: 1, _id: 0 },
+  ).lean();
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user.withdrawalAddressAndMethod ?? null;
+};
+
 export const user_services = {
   createUser,
   getAllUsers,
@@ -945,4 +962,5 @@ export const user_services = {
   getUserCompletedProducts,
   updateScore,
   udpateFreezeWithdraw,
+  getUserWithdrawAddress,
 };

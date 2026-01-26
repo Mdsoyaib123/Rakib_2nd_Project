@@ -261,20 +261,17 @@ const updateUserSelectedPackageAmount = async (
     throw new Error("Insufficient balance, please recharge first");
   }
 
-  const isBlockedRound =
-    user.orderRound.round !== "round_one" &&
-    user.orderRound.status === false &&
-    user.quantityOfOrders > 0;
+  // const isBlockedRound =
+  //   user.orderRound.round !== "round_one" &&
+  //   user.orderRound.status === false &&
+  //   user.quantityOfOrders > 0;
 
-  console.log("is blocked", isBlockedRound);
+  // console.log("is blocked", isBlockedRound);
 
   if (
-    (user?.orderRound.round === "trial" &&
-      user?.orderRound.status === false &&
-      user.quantityOfOrders > 0) ||
-    (user?.orderRound.round === "round_two" &&
-      user?.orderRound.status === false &&
-      user.quantityOfOrders > 0)
+    !user?.orderRound?.status &&
+    user?.quantityOfOrders > 0 &&
+    user?.orderRound?.round !== "round_one"
   ) {
     throw new Error(
       "Please withdraw your money first, then select another package",

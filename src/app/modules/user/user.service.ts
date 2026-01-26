@@ -274,7 +274,7 @@ const updateUserSelectedPackageAmount = async (
   //   );
   // }
 
-    const isBlockedRound =
+  const isBlockedRound =
     !user.orderRound.status &&
     user.quantityOfOrders > 0 &&
     ["trial", "round_two"].includes(user.orderRound.round);
@@ -708,7 +708,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (
-      (user.orderRound?.round === "trial"
+      (user.userDiopsitType === "trial"
         ? user.trialRoundBalance
         : user.userBalance) < product?.price
     ) {
@@ -789,8 +789,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     const updatedUser = await User_Model.findOne({ userId }).session(session);
 
     if (
-      updatedUser?.orderRound?.round === "trial" &&
-      updatedUser?.orderRound?.status === false &&
+      updatedUser?.userDiopsitType === "trial" &&
       updatedUser?.quantityOfOrders === 0
     ) {
       await User_Model.updateOne(

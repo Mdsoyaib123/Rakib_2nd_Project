@@ -428,6 +428,26 @@ const udpateFreezeWithdraw = async (req: Request, res: Response) => {
     });
   }
 };
+const getUserWithdrawAddress = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.getUserWithdrawAddress(
+      userId as unknown as number,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `get user withdrawal address successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -450,5 +470,6 @@ export const user_controllers = {
   updateWithdrawalAddress,
   getUserCompletedProducts,
   updateScore,
-  udpateFreezeWithdraw
+  udpateFreezeWithdraw,
+  getUserWithdrawAddress,
 };

@@ -280,7 +280,7 @@ const updateUserSelectedPackageAmount = async (
 
   const isBlockedRound =
     !user.orderRound.status &&
-    user.quantityOfOrders > 0 &&
+    user.quantityOfOrders <= 0 &&
     ["trial", "round_two"].includes(user.orderRound.round) &&
     user.orderRound.round !== "round_one";
 

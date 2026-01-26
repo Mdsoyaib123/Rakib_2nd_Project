@@ -261,32 +261,29 @@ const updateUserSelectedPackageAmount = async (
     throw new Error("Insufficient balance, please recharge first");
   }
 
-  const isBlockedRound =
-    user.orderRound.round !== "round_one" &&
-    user.orderRound.status === false &&
-    user.quantityOfOrders > 0;
+  // const isBlockedRound =
+  //   user.orderRound.round !== "round_one" &&
+  //   user.orderRound.status === false &&
+  //   user.quantityOfOrders > 0;
 
-  console.log("is blocked", isBlockedRound);
+  // console.log("is blocked", isBlockedRound);
 
-  if (!isBlockedRound) {
+  // if (!isBlockedRound) {
+  //   throw new Error(
+  //     "Please withdraw your money first, then select another package",
+  //   );
+  // }
+
+    const isBlockedRound =
+    !user.orderRound.status &&
+    user.quantityOfOrders > 0 &&
+    ["trial", "round_two"].includes(user.orderRound.round);
+
+  if (isBlockedRound) {
     throw new Error(
       "Please withdraw your money first, then select another package",
     );
   }
-
-
-//   const isBlockedRound =
-//   !user.orderRound.status &&
-//   user.quantityOfOrders > 0 &&
-//   ["trial", "round_two"].includes(user.orderRound.round);
-
-// if (isBlockedRound) {
-//   throw new Error(
-//     "Please withdraw your money first, then select another package",
-//   );
-// }
-
-
 
   //  const isBlockedRound =
   //   user.orderRound.round !== "round_one" &&
@@ -711,7 +708,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (
-      (user.userDiopsitType === "trial"
+      (user.orderRound.round === "trial"
         ? user.trialRoundBalance
         : user.userBalance) < product?.price
     ) {

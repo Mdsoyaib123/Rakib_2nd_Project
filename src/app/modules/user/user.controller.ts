@@ -448,6 +448,27 @@ const getUserWithdrawAddress = async (req: Request, res: Response) => {
     });
   }
 };
+const updateWithdrawPassword = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.updateWithdrawPassword(
+      userId as unknown as number,
+      req.body.withdrawPassword,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `withdraw password updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -472,4 +493,5 @@ export const user_controllers = {
   updateScore,
   udpateFreezeWithdraw,
   getUserWithdrawAddress,
+  updateWithdrawPassword,
 };

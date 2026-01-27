@@ -13,6 +13,10 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
 
   const user = await User_Model.findOne({ userId });
 
+  if (user?.withdrawPassword === null) {
+    throw new Error("Please add withdrawal password first");
+  }
+
   if (!user) throw new Error("User not found");
   if (user.freezeUser) throw new Error("User account is frozen");
   if (user?.freezeWithdraw)
@@ -100,6 +104,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
     withdrawPayload.mobileBankingName = withdrawalMethod.mobileBankingName;
     withdrawPayload.mobileBankingAccountNumber =
       withdrawalMethod?.mobileBankingAccountNumber as number;
+    withdrawPayload.mobileUserDistrict = withdrawalMethod.mobileUserDistrict;
   }
 
   const withdraw = await Withdraw_Model.create(withdrawPayload);
@@ -187,16 +192,49 @@ const rejectWithdrawService = async (
   return withdraw;
 };
 
-const getAllWithdrawsService = async (page = 1, limit = 10) => {
+const getAllWithdrawsService = async (
+  page = 1,
+  limit = 10,
+  transactionStatus?: string,
+  userId?: string,
+  withdrawalAmount?: number,
+) => {
   const skip = (page - 1) * limit;
 
-  const [data, total] = await Promise.all([
-    Withdraw_Model.find().skip(skip).limit(limit).sort({ createdAt: -1 }),
-    Withdraw_Model.countDocuments(),
+  // 🔎 Build dynamic query
+  const query: any = {};
+
+  if (transactionStatus) {
+    query.transactionStatus = transactionStatus;
+  }
+
+  if (userId) {
+    query.userId = Number(userId); 
+  }
+
+  if (withdrawalAmount !== undefined) {
+    query.withdrawalAmount = withdrawalAmount;
+  }
+
+  // 📦 Fetch data
+  const [withdraws, total] = await Promise.all([
+    Withdraw_Model.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    Withdraw_Model.countDocuments(query),
   ]);
 
   return {
-    data,
+    data: withdraws,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
   };
 };
 

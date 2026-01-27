@@ -51,7 +51,12 @@ const withdrawSchema = new Schema<TWithdraw>(
         return this.withdrawMethod === "MobileBanking";
       },
     },
-
+    mobileUserDistrict: {
+      type: String,
+      required: function (this: TWithdraw) {
+        return this.withdrawMethod === "MobileBanking";
+      },
+    },
     withdrawalAmount: { type: Number, required: true },
     totalRechargeAmount: { type: Number },
     totalWithdrawalAmount: { type: Number },
@@ -60,11 +65,12 @@ const withdrawSchema = new Schema<TWithdraw>(
     processingTime: { type: Date },
 
     reviewRemark: { type: String },
+
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Withdraw_Model = mongoose.model<TWithdraw>(
   "Withdraw",
-  withdrawSchema
+  withdrawSchema,
 );

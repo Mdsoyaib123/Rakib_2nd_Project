@@ -870,8 +870,11 @@ const updateWithdrawalAddress = async (userId: number, payload: any) => {
       ...cleanedPayload,
       mobileBankingName: payload.mobileBankingName,
       mobileBankingAccountNumber: payload.mobileBankingAccountNumber,
+      mobileUserDistrict: payload.mobileUserDistrict,
     };
   }
+
+  console.log("clean payload", cleanedPayload);
 
   return await User_Model.findOneAndUpdate(
     { userId },
@@ -957,6 +960,26 @@ const getUserWithdrawAddress = async (userId: number) => {
 
   return user.withdrawalAddressAndMethod ?? null;
 };
+const updateWithdrawPassword = async (userId: number, payload: any) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const updateUser = await User_Model.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        withdrawalPassword: payload,
+      },
+    },
+  );
+
+  if (!updateUser) {
+    throw new Error("User not found");
+  }
+
+  return updateUser;
+};
 
 export const user_services = {
   createUser,
@@ -982,4 +1005,5 @@ export const user_services = {
   updateScore,
   udpateFreezeWithdraw,
   getUserWithdrawAddress,
+  updateWithdrawPassword,
 };

@@ -44,7 +44,7 @@ const rejectWithdraw = async (req: Request, res: Response) => {
 
     const result = await WithdrawService.rejectWithdrawService(
       withdrawId,
-      reviewRemark
+      reviewRemark,
     );
 
     res.status(200).json({
@@ -64,7 +64,13 @@ const getAllWithdraws = async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
-    const result = await WithdrawService.getAllWithdrawsService(page, limit);
+    const result = await WithdrawService.getAllWithdrawsService(
+      page,
+      limit,
+      req.query.transactionStatus as string,
+      req.query.userId as string,
+      req.query.withdrawalAmount as unknown as number,
+    );
 
     res.status(200).json({
       success: true,
@@ -87,7 +93,7 @@ const getSingleUserWithdraws = async (req: Request, res: Response) => {
     const result = await WithdrawService.getSingleUserWithdraws(
       Number(userId),
       page,
-      limit
+      limit,
     );
 
     res.status(200).json({

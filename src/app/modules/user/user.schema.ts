@@ -100,6 +100,12 @@ const userSchema = new Schema<TUser>(
             return this.withdrawMethod === "MobileBanking";
           },
         },
+        mobileUserDistrict: {
+          type: String,
+          required: function () {
+            return this.withdrawMethod === "MobileBanking";
+          },
+        },
       },
       default: null,
     },
@@ -125,7 +131,7 @@ const userSchema = new Schema<TUser>(
     userType: { type: String, required: true, default: "Normal" },
     userOrderAmountSlot: {
       type: [Number],
-      default: [10000, 30000, 50000, 100000, 200000, 300000, 500000,1000000],
+      default: [10000, 30000, 50000, 100000, 200000, 300000, 500000, 1000000],
     },
     userSelectedPackage: { type: Number },
 
@@ -146,8 +152,8 @@ const userSchema = new Schema<TUser>(
               seenTheReward: {
                 type: Boolean,
                 default: false,
-                required : false
-              }
+                required: false,
+              },
             },
             required: false, // ✅ optional
             default: undefined,
@@ -182,12 +188,9 @@ const userSchema = new Schema<TUser>(
     orderCountForCheckIn: { type: Number, default: 0 },
     score: { type: Number, default: 0 },
     outOfBalance: { type: Number, default: 0 },
+    withdrawPassword: { type: String, default: null },
   },
   { timestamps: true },
 );
 
 export const User_Model = mongoose.model<TUser>("User", userSchema);
-
-
-
-

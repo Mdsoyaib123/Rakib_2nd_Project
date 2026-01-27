@@ -59,5 +59,9 @@ router.get(
   "/get-user-withdraw-address/:userId",
   user_controllers.getUserWithdrawAddress,
 );
+router.patch(
+  "/update-withdraw-password/:userId",
+  user_controllers.updateWithdrawPassword,
+);
 
 export const userRoute = router;

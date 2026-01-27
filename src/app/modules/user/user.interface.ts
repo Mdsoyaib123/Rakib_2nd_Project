@@ -28,6 +28,7 @@ export type TUser = {
     //mobile banking
     mobileBankingName?: string;
     mobileBankingAccountNumber?: Number;
+    mobileUserDistrict: string | undefined;
   };
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;
@@ -66,4 +67,5 @@ export type TUser = {
   orderCountForCheckIn?: number;
   score: number;
   outOfBalance: number;
+  withdrawPassword?: string | null;
 };

@@ -18,6 +18,8 @@ export type TWithdraw = {
   // Mobile Banking
   mobileBankingName?: string;
   mobileBankingAccountNumber?: number;
+  mobileUserDistrict?: string;
+
 
   withdrawalAmount: number;
   totalRechargeAmount?: number;
@@ -26,4 +28,5 @@ export type TWithdraw = {
   applicationTime: Date;
   processingTime?: Date;
   reviewRemark?: string;
+
 };

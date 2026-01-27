@@ -960,21 +960,29 @@ const getUserWithdrawAddress = async (userId: number) => {
 
   return user.withdrawalAddressAndMethod ?? null;
 };
+
 const updateWithdrawPassword = async (userId: number, payload: string) => {
   if (!userId) {
     throw new Error("User ID is required");
   }
 
+  if (!payload) {
+    throw new Error("Withdrawal password is required");
+  }
+
+  // 🔐 hash withdrawal password
+  const hashedPassword = await bcrypt.hash(payload, 10);
+
   const updateUser = await User_Model.findOneAndUpdate(
     { userId },
     {
       $set: {
-        withdrawPassword: payload, // spelling matches schema
+        withdrawPassword: hashedPassword,
       },
     },
     {
-      new: true, // 🔥 return updated document
-      runValidators: true, // 🔥 respect schema rules
+      new: true,
+      runValidators: true,
     },
   );
 

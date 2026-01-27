@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import { User_Model } from "../user/user.schema";
 import { Withdraw_Model } from "./withdrow.model";
 import { TWithdraw } from "./withdrow.interface";
+import bcrypt from "bcrypt";
 
 type CreateWithdrawPayload = {
   userId: number;
   amount: number;
-  withdrawPassword: string ;
+  withdrawPassword: string;
 };
 
 const createWithdrawService = async (payload: CreateWithdrawPayload) => {
@@ -14,11 +15,14 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
 
   const user = await User_Model.findOne({ userId });
 
-  if (user?.withdrawPassword === null) {
+  if (!user?.withdrawPassword) {
     throw new Error("Please add withdrawal password first");
   }
 
-  if (user?.withdrawPassword !== withdrawPassword) {
+  // 🔐 compare hashed password
+  const isMatch = await bcrypt.compare(withdrawPassword, user.withdrawPassword);
+
+  if (!isMatch) {
     throw new Error("Incorrect withdrawal password");
   }
 

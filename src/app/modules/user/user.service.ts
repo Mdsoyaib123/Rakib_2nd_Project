@@ -682,9 +682,15 @@ const purchaseOrder = async (userId: number) => {
     product,
     isAdminAssigned,
     outOfBalance: outOfBalance,
-    mysteryboxMethod: forcedProductRule?.mysterybox?.method === '12x'
-      ? forcedProductRule?.mysterybox?.method
-      : '3x',
+    mysteryboxMethod:
+      forcedProductRule?.mysterybox?.method === "12x"
+        ? forcedProductRule?.mysterybox?.method
+        : !forcedProductRule?.mysterybox?.method &&
+            !forcedProductRule?.mysterybox?.amount &&
+            forcedProductRule?.productId &&
+            forcedProductRule?.orderNumber
+          ? "3x"
+          : null,
     mysteryboxAmount: forcedProductRule?.mysterybox?.amount
       ? forcedProductRule?.mysterybox?.amount
       : null,

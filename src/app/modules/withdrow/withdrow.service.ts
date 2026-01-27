@@ -6,15 +6,20 @@ import { TWithdraw } from "./withdrow.interface";
 type CreateWithdrawPayload = {
   userId: number;
   amount: number;
+  withdrawPassword: string ;
 };
 
 const createWithdrawService = async (payload: CreateWithdrawPayload) => {
-  const { userId, amount } = payload;
+  const { userId, amount, withdrawPassword } = payload;
 
   const user = await User_Model.findOne({ userId });
 
   if (user?.withdrawPassword === null) {
     throw new Error("Please add withdrawal password first");
+  }
+
+  if (user?.withdrawPassword !== withdrawPassword) {
+    throw new Error("Incorrect withdrawal password");
   }
 
   if (!user) throw new Error("User not found");
@@ -209,7 +214,7 @@ const getAllWithdrawsService = async (
   }
 
   if (userId) {
-    query.userId = Number(userId); 
+    query.userId = Number(userId);
   }
 
   if (withdrawalAmount !== undefined) {

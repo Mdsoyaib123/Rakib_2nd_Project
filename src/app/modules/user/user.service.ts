@@ -960,7 +960,7 @@ const getUserWithdrawAddress = async (userId: number) => {
 
   return user.withdrawalAddressAndMethod ?? null;
 };
-const updateWithdrawPassword = async (userId: number, payload: any) => {
+const updateWithdrawPassword = async (userId: number, payload: string) => {
   if (!userId) {
     throw new Error("User ID is required");
   }
@@ -969,8 +969,12 @@ const updateWithdrawPassword = async (userId: number, payload: any) => {
     { userId },
     {
       $set: {
-        withdrawalPassword: payload,
+        withdrawPassword: payload, // spelling matches schema
       },
+    },
+    {
+      new: true, // 🔥 return updated document
+      runValidators: true, // 🔥 respect schema rules
     },
   );
 

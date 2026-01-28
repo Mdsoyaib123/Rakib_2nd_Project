@@ -781,7 +781,11 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       $inc: {
         quantityOfOrders: -1,
         completedOrdersCount: 1,
-        orderCountForCheckIn: user?.userDiopsitType === "deposit" ? 1 : 0,
+        orderCountForCheckIn:
+          user?.orderRound.round === "round_one" ||
+          user?.orderRound.round === "round_two"
+            ? 1
+            : 0,
         userBalance: forcedProductRule
           ? Number(productCommisionTenpercent)
           : product.commission,

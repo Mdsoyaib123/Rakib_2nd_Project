@@ -125,6 +125,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
       $inc: {
         userBalance: -amount,
         memberTotalWithdrawal: +amount,
+        amountFrozedInWithdrawal : +amount
       },
     },
   );
@@ -155,7 +156,9 @@ const acceptWithdrawService = async (withdrawId: string) => {
     await User_Model.updateOne(
       { userId: withdraw.userId },
       {
-        $inc: {}, // keeping your logic as-is
+        $inc: {
+          amountFrozedInWithdrawal : -withdraw.withdrawalAmount
+        }, // keeping your logic as-is
       },
       { session },
     );
@@ -194,6 +197,7 @@ const rejectWithdrawService = async (
       $inc: {
         userBalance: withdraw.withdrawalAmount,
         memberTotalWithdrawal: -withdraw.withdrawalAmount,
+        amountFrozedInWithdrawal : -withdraw.withdrawalAmount
       },
     },
   );
@@ -274,5 +278,5 @@ export const WithdrawService = {
   rejectWithdrawService,
   getAllWithdrawsService,
   getSingleUserWithdraws,
-  getSingleWithdraw
+  getSingleWithdraw,
 };

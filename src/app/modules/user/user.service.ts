@@ -886,9 +886,20 @@ const updateWithdrawalAddress = async (userId: number, payload: any) => {
 
   console.log("clean payload", cleanedPayload);
 
+  const updateData: any = {
+    withdrawalAddressAndMethod: cleanedPayload,
+  };
+
+  if (payload.withdrawPassword) {
+    const hashedPassword = await bcrypt.hash(payload.withdrawPassword, 10);
+    updateData.withdrawPassword = hashedPassword;
+  }
+
   return await User_Model.findOneAndUpdate(
     { userId },
-    { $set: { withdrawalAddressAndMethod: cleanedPayload } },
+    {
+      $set: updateData,
+    },
     { new: true, runValidators: true },
   );
 };
@@ -1003,6 +1014,33 @@ const updateWithdrawPassword = async (userId: number, payload: string) => {
   return updateUser;
 };
 
+const addBonusReward = async (
+  userId: number,
+  amount: number,
+  notes: string,
+) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const updateUser = await User_Model.findOneAndUpdate(
+    { userId },
+    { $inc: { userBalance: amount } },
+    { new: true },
+  );
+
+  if (updateUser) {
+    await HistoryModel.create({
+      userId: updateUser._id,
+      historyType: "recharge",
+      amount: amount,
+      time: new Date(),
+      notes: notes,
+    });
+  }
+  ret
+};
+
 export const user_services = {
   createUser,
   getAllUsers,
@@ -1028,4 +1066,5 @@ export const user_services = {
   udpateFreezeWithdraw,
   getUserWithdrawAddress,
   updateWithdrawPassword,
+  addBonusReward
 };

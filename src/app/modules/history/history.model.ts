@@ -28,6 +28,7 @@ const historySchema = new Schema<THistory>(
       type: Date,
       default: Date.now,
     },
+    notes: { type: String },
   },
   {
     timestamps: true,

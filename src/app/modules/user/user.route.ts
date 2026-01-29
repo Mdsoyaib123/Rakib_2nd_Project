@@ -63,5 +63,6 @@ router.patch(
   "/update-withdraw-password/:userId",
   user_controllers.updateWithdrawPassword,
 );
+router.patch("/add-bonus-reward/:userId", user_controllers.addBonusReward);
 
 export const userRoute = router;

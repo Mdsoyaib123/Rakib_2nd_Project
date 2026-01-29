@@ -1038,7 +1038,7 @@ const addBonusReward = async (
       notes: notes,
     });
   }
-  ret
+  return updateUser;
 };
 
 export const user_services = {

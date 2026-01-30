@@ -475,7 +475,7 @@ const addBonusReward = async (req: Request, res: Response) => {
     const { amount, notes } = req.body;
 
     const result = await user_services.addBonusReward(
-      userId as unknown as number,
+      Number(userId) as unknown as number,
       amount as unknown as number,
       notes as string,
     );
@@ -565,5 +565,5 @@ export const user_controllers = {
   updateWithdrawPassword,
   addBonusReward,
   getSuperiorUserRechargeAndWithdraw,
-  getPlatformRechargeAndWithdrawFromSuperiorData
+  getPlatformRechargeAndWithdrawFromSuperiorData,
 };

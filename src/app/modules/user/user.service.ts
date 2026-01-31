@@ -646,17 +646,42 @@ const purchaseOrder = async (userId: number) => {
       outOfBalance = product?.price - user.userBalance;
     }
   } else {
-    console.log("hit the logic ------------------");
-    const products = await ProductModel.aggregate([
-      { $match: { price: { $lte: user?.userSelectedPackage } } },
+    // // console.log("hit the logic ------------------");
+    // const products = await ProductModel.aggregate([
+    //   { $match: { price: { $lte: user?.userSelectedPackage } } },
+    //   { $sample: { size: 1 } },
+    // ]);
+
+    // if (!products.length) {
+    //   return {
+    //     success: false,
+    //     message: "Insufficient balance to purchase any product",
+    //   };
+    // }
+
+    //new logic
+
+    const usedProductIds = user.completedOrderProducts?.length
+      ? user.completedOrderProducts.map(Number)
+      : [];
+
+    let products = await ProductModel.aggregate([
+      {
+        $match: {
+          price: { $lte: user.userSelectedPackage },
+          ...(usedProductIds.length && {
+            productId: { $nin: usedProductIds },
+          }),
+        },
+      },
       { $sample: { size: 1 } },
     ]);
 
     if (!products.length) {
-      return {
-        success: false,
-        message: "Insufficient balance to purchase any product",
-      };
+      products = await ProductModel.aggregate([
+        { $match: { price: { $lte: user.userSelectedPackage } } },
+        { $sample: { size: 1 } },
+      ]);
     }
 
     product = products[0];
@@ -1183,7 +1208,6 @@ const getPlatformRechargeAndWithdrawFromSuperiorData = async () => {
     totalWithdraw: withdrawAgg[0]?.totalWithdraw || 0,
   };
 };
-
 
 export const user_services = {
   createUser,

@@ -69,7 +69,10 @@ const getAllWithdraws = async (req: Request, res: Response) => {
       limit,
       req.query.transactionStatus as string,
       req.query.userId as string,
-      req.query.withdrawalAmount as unknown as number,
+      req.query.withdrawalAmount
+        ? Number(req.query.withdrawalAmount)
+        : undefined,
+      req.query.phoneLast4 as string,
     );
 
     res.status(200).json({
@@ -84,6 +87,7 @@ const getAllWithdraws = async (req: Request, res: Response) => {
     });
   }
 };
+
 const getSingleUserWithdraws = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;

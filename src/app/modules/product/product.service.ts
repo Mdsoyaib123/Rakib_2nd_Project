@@ -86,6 +86,7 @@ const getAllProducts = async (
   }
 
   const data = await ProductModel.find(query)
+    .sort({ price: 1 })
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();

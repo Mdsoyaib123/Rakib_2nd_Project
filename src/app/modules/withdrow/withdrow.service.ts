@@ -125,7 +125,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
       $inc: {
         userBalance: -amount,
         memberTotalWithdrawal: +amount,
-        amountFrozedInWithdrawal : +amount
+        amountFrozedInWithdrawal: +amount,
       },
     },
   );
@@ -157,7 +157,7 @@ const acceptWithdrawService = async (withdrawId: string) => {
       { userId: withdraw.userId },
       {
         $inc: {
-          amountFrozedInWithdrawal : -withdraw.withdrawalAmount
+          amountFrozedInWithdrawal: -withdraw.withdrawalAmount,
         }, // keeping your logic as-is
       },
       { session },
@@ -197,7 +197,7 @@ const rejectWithdrawService = async (
       $inc: {
         userBalance: withdraw.withdrawalAmount,
         memberTotalWithdrawal: -withdraw.withdrawalAmount,
-        amountFrozedInWithdrawal : -withdraw.withdrawalAmount
+        amountFrozedInWithdrawal: -withdraw.withdrawalAmount,
       },
     },
   );
@@ -211,25 +211,47 @@ const getAllWithdrawsService = async (
   transactionStatus?: string,
   userId?: string,
   withdrawalAmount?: number,
+  phoneLast4?: string,
 ) => {
   const skip = (page - 1) * limit;
-
-  // 🔎 Build dynamic query
   const query: any = {};
 
+  // 1️⃣ Transaction status
   if (transactionStatus) {
     query.transactionStatus = transactionStatus;
   }
 
-  if (userId) {
-    query.userId = Number(userId);
-  }
-
-  if (withdrawalAmount !== undefined) {
+  // 2️⃣ Withdrawal amount
+  if (withdrawalAmount !== undefined && !isNaN(withdrawalAmount)) {
     query.withdrawalAmount = withdrawalAmount;
   }
 
-  // 📦 Fetch data
+  // 3️⃣ Filter by phone last 4 digits (highest priority)
+  if (phoneLast4) {
+    const user = await User_Model.findOne({
+      phoneNumber: { $regex: `${phoneLast4}$` },
+    }).select("userId");
+
+    if (!user) {
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
+      };
+    }
+
+    query.userId = user.userId;
+  }
+  // 4️⃣ Otherwise filter by userId
+  else if (userId) {
+    query.userId = Number(userId);
+  }
+
+  // 5️⃣ Fetch data
   const [withdraws, total] = await Promise.all([
     Withdraw_Model.find(query)
       .sort({ createdAt: -1 })
@@ -250,6 +272,7 @@ const getAllWithdrawsService = async (
     },
   };
 };
+
 
 const getSingleUserWithdraws = async (userId: number, page = 1, limit = 10) => {
   const skip = (page - 1) * limit;

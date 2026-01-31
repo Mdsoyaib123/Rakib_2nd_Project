@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-
 import { User_Model } from "../modules/user/user.schema";
 import { configs } from "../configs";
 
@@ -16,14 +15,26 @@ export const initSocket = (server: any) => {
     pingInterval: 5000,
   });
 
-  // 🔐 JWT auth middleware
+  /* ======================
+     JWT AUTH
+  ====================== */
   io.use((socket: any, next) => {
     try {
-      const token = socket.handshake.auth?.token;
+      let token =
+        socket.handshake.auth?.token || socket.handshake.headers?.token;
+
       if (!token) return next(new Error("Unauthorized"));
 
-      const decoded = jwt.verify(token, configs.jwt.access_token_secret!) as any;
-      socket.userId = decoded.id; // MongoDB _id
+      const decoded: any = jwt.verify(token, configs.jwt.access_token_secret!);
+
+      console.log("decoded JWT:", decoded);
+
+      // ✅ FORCE STRING
+      socket.userId = String(decoded.userId);
+
+      if (!socket.userId) {
+        return next(new Error("Invalid token payload"));
+      }
 
       next();
     } catch (err) {
@@ -31,44 +42,49 @@ export const initSocket = (server: any) => {
     }
   });
 
+  /* ======================
+     CONNECTION
+  ====================== */
   io.on("connection", async (socket: any) => {
-    console.log(`🟢 Socket connected: ${socket.id}`);
-    const userId = socket.userId;
+    const userId: string = socket.userId;
+    console.log(`🟢 User entered site: ${userId}`);
 
-    // ---- CONNECT ----
+    // FIRST CONNECTION → ONLINE
     if (!onlineUsers.has(userId)) {
       onlineUsers.set(userId, new Set());
+
+      await User_Model.findOneAndUpdate(
+        { userId: Number(userId) }, // 👈 number field
+        {
+          isOnline: true,
+          lastLoginTime: new Date(),
+        },
+      );
     }
 
     onlineUsers.get(userId)!.add(socket.id);
 
-    // First socket = online
-    if (onlineUsers.get(userId)!.size === 1) {
-      await User_Model.findByIdAndUpdate(userId, {
-        isOnline: true,
-        lastLoginTime: new Date(),
-      });
-    }
-
-    console.log(`🟢 User ${userId} online`);
-
-    // ---- DISCONNECT ----
+    /* ======================
+       DISCONNECT
+    ====================== */
     socket.on("disconnect", async () => {
+      console.log(`🔴 User left site: ${userId}`);
+
       const sockets = onlineUsers.get(userId);
       if (!sockets) return;
 
       sockets.delete(socket.id);
 
-      // Last socket = offline
       if (sockets.size === 0) {
         onlineUsers.delete(userId);
 
-        await User_Model.findByIdAndUpdate(userId, {
-          isOnline: false,
-        });
-
-        console.log(`🔴 User ${userId} offline`);
+        await User_Model.findOneAndUpdate(
+          { userId: Number(userId) },
+          { isOnline: false },
+        );
       }
     });
   });
+
+  console.log("✅ Socket.IO ready");
 };

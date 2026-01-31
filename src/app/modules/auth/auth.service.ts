@@ -17,7 +17,7 @@ const login_user_from_db = async (
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
   });
-  console.log("is account", isExistAccount);
+  // console.log("is account", isExistAccount);
   if (!isExistAccount) {
     throw new AppError("Account is   Not Found", httpStatus.NOT_FOUND);
   }
@@ -47,6 +47,7 @@ const login_user_from_db = async (
     {
       phoneNumber: isExistAccount.phoneNumber,
       role: isExistAccount.role,
+      userId: isExistAccount.userId,
     },
     configs.jwt.access_token_secret as Secret,
     configs.jwt.access_token_expires as string,
@@ -58,6 +59,7 @@ const login_user_from_db = async (
     {
       phoneNumber: isExistAccount.phoneNumber,
       role: isExistAccount.role,
+      userId: isExistAccount.userId,
     },
     configs.jwt.refresh_token_secret as Secret,
     configs.jwt.refresh_token_expires as string,

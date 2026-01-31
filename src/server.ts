@@ -1,26 +1,18 @@
-// import mongoose from "mongoose";
-// import app from "./app";
-// import { configs } from "./app/configs";
-// async function main() {
-//     await mongoose.connect(configs.db_url!);
-//     app.listen(configs.port, () => {
-//         console.log(`Server listening on port ${configs.port}`);
-//     });
-// }
-// main().catch(err => console.log(err));
-
 import http from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { configs } from "./app/configs";
+
+import { User_Model } from "./app/modules/user/user.schema";
 import { initSocket } from "./app/utils/socket";
 
-async function main() {
+async function startServer() {
   await mongoose.connect(configs.db_url!);
 
-  const server = http.createServer(app);
+  // Prevent ghost online users after restart
+  await User_Model.updateMany({}, { isOnline: false });
 
-  // 🔥 initialize socket.io here
+  const server = http.createServer(app);
   initSocket(server);
 
   server.listen(configs.port, () => {
@@ -28,4 +20,4 @@ async function main() {
   });
 }
 
-main().catch((err) => console.log(err));
+startServer();

@@ -47,7 +47,7 @@ const createUser = async (payload: Partial<TUser>) => {
   const invitationCode = await generateUniqueInvitationCode();
   payload.invitationCode = invitationCode;
 
-  payload.quantityOfOrders = 25; // Trial round orders
+  payload.quantityOfOrders = 30; // Trial round orders
   payload.userDiopsitType = "trial";
   payload.userBalance = 0;
   payload.trialRoundBalance = 10000;
@@ -220,9 +220,9 @@ const enableOrderRound = async (
         "orderRound.round": round,
         "orderRound.status": status,
         quantityOfOrders:
-          user?.quantityOfOrders === 0 ? 25 : user?.quantityOfOrders, // admin decides quantity
+          user?.quantityOfOrders === 0 ? 30 : user?.quantityOfOrders, // admin decides quantity
         completedOrdersCount:
-          user?.completedOrdersCount === 25 ? 0 : user?.completedOrdersCount,
+          user?.completedOrdersCount === 30 ? 0 : user?.completedOrdersCount,
       },
     },
     { new: true },

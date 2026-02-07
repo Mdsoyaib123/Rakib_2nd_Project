@@ -26,6 +26,7 @@ app.use(
       "https://juwelo-client.vercel.app",
       "https://juweloonline.com",
       "https://cozy-muffin-610776.netlify.app",
+      "https://jocular-crumble-9cfb2b.netlify.app",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],

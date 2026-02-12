@@ -1,8 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Request, Response } from "express";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 import globalErrorHandler from "./app/middlewares/global_error_handler";
 import notFound from "./app/middlewares/not_found_api";
 import appRouter from "./routes";
@@ -11,7 +9,6 @@ import { configs } from "./app/configs";
 import bcrypt from "bcrypt";
 import cron from "node-cron";
 
-// define app
 const app = express();
 
 // middleware
@@ -22,10 +19,9 @@ app.use(
       "http://localhost:5174",
       "https://dainty-semifreddo-2cf1f0.netlify.app",
       "https://rainbow-sopapillas-9e5e0e.netlify.app",
-      "https://juwelo-dashboard.vercel.app",
-      "https://juwelo-client.vercel.app",
       "https://juweloonline.com",
-      "https://admin.juweloonline.com",
+      "https://cozy-muffin-610776.netlify.app",
+      "https://jocular-crumble-9cfb2b.netlify.app",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],

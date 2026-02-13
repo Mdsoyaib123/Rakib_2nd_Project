@@ -23,6 +23,8 @@ app.use(
       "https://cozy-muffin-610776.netlify.app",
       "https://jocular-crumble-9cfb2b.netlify.app",
       "*",
+      "https://api.autotraderonlline.com",
+      "https://admin.autotraderonline.com"
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true,

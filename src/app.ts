@@ -18,15 +18,15 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://dainty-semifreddo-2cf1f0.netlify.app",
-      "https://rainbow-sopapillas-9e5e0e.netlify.app",
-      "https://juweloonline.com",
-      "https://cozy-muffin-610776.netlify.app",
-      "https://jocular-crumble-9cfb2b.netlify.app",
-      "*",
-      "https://api.autotraderonlline.com",
-      "https://admin.autotraderonline.com",
-      "http://api.autotraderonlline.com",
-      "http://admin.autotraderonline.com"
+  "https://rainbow-sopapillas-9e5e0e.netlify.app",
+  "https://juweloonline.com",
+  "https://cozy-muffin-610776.netlify.app",
+  "https://jocular-crumble-9cfb2b.netlify.app",
+  "http://autotraderonlline.com",
+  "https://autotraderonlline.com",
+  "http://admin.autotraderonline.com",
+  "https://admin.autotraderonline.com",
+      
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true,
@@ -97,3 +97,4 @@ app.use(notFound);
 
 // export app
 export default app;
+

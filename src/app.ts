@@ -24,7 +24,7 @@ app.use(
       "https://jocular-crumble-9cfb2b.netlify.app",
       "*",
       "https://api.autotraderonlline.com",
-      "https://admin.autotraderonline.com"
+      "https://admin.autotraderonline.com",
       "http://api.autotraderonlline.com",
       "http://admin.autotraderonline.com"
     ],

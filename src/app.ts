@@ -1,8 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Request, Response } from "express";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 import globalErrorHandler from "./app/middlewares/global_error_handler";
 import notFound from "./app/middlewares/not_found_api";
 import appRouter from "./routes";
@@ -14,22 +12,32 @@ import cron from "node-cron";
 const app = express();
 
 // middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://autotraderonline.net",
+  "https://admin.autotraderonline.net",
+  // Add http versions only if you really still serve http in production (usually not needed)
+  // "http://autotraderonline.net",
+  // "http://admin.autotraderonline.net",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://dainty-semifreddo-2cf1f0.netlify.app",
-      "https://rainbow-sopapillas-9e5e0e.netlify.app",
-      "https://juwelo-dashboard.vercel.app",
-      "https://juwelo-client.vercel.app",
-      "https://juweloonline.com",
-      "https://admin.juweloonline.com",
-      "*",
-    ],
-    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, origin); // Reflect (echo) the exact Origin value
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  })
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"], // add more if you use custom headers
+  }),
 );
 app.use(express.json({ limit: "100mb" }));
 app.use(express.raw());
@@ -55,7 +63,7 @@ export const createDefaultSuperAdmin = async () => {
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(
         "admin@123",
-        Number(configs.bcrypt_salt_rounds)
+        Number(configs.bcrypt_salt_rounds),
       );
 
       await User_Model.create({

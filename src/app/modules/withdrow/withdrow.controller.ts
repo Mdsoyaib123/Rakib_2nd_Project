@@ -43,7 +43,7 @@ const rejectWithdraw = async (req: Request, res: Response) => {
     const { reviewRemark } = req.body;
 
     const result = await WithdrawService.rejectWithdrawService(
-      withdrawId,
+      withdrawId as string,
       reviewRemark,
     );
 
@@ -116,7 +116,7 @@ const getSingleWithdraw = async (req: Request, res: Response) => {
   try {
     const { withdrawId } = req.params;
 
-    const result = await WithdrawService.getSingleWithdraw(withdrawId);
+    const result = await WithdrawService.getSingleWithdraw(withdrawId as string);
 
     res.status(200).json({
       success: true,

@@ -10,7 +10,7 @@ export const configs = {
         refresh_token_expires: process.env.REFRESH_EXPIRES,
         reset_secret: process.env.RESET_SECRET,
         reset_expires: process.env.RESET_EXPIRES,
-        front_end_url: process.env.FRONT_END_URL,
+        // front_end_url: process.env.FRONT_END_URL,
         verified_token: process.env.VERIFIED_TOKEN
 
     },

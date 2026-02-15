@@ -68,62 +68,62 @@ const change_password = catchAsync(async (req, res) => {
   });
 });
 
-const forget_password = catchAsync(async (req, res) => {
-  const { email } = req?.body;
-  await auth_services.forget_password_from_db(email);
-  manageResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Reset password link sent to your email!",
-    data: null,
-  });
-});
+// const forget_password = catchAsync(async (req, res) => {
+//   const { email } = req?.body;
+//   await auth_services.forget_password_from_db(email);
+//   manageResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "Reset password link sent to your email!",
+//     data: null,
+//   });
+// });
 
-const reset_password = catchAsync(async (req, res) => {
-  const { token, newPassword, email } = req.body;
-  const result = await auth_services.reset_password_into_db(
-    token,
-    email,
-    newPassword
-  );
-  manageResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Password reset successfully!",
-    data: result,
-  });
-});
+// const reset_password = catchAsync(async (req, res) => {
+//   const { token, newPassword, email } = req.body;
+//   const result = await auth_services.reset_password_into_db(
+//     token,
+//     email,
+//     newPassword
+//   );
+//   manageResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "Password reset successfully!",
+//     data: result,
+//   });
+// });
 
-const verified_account = catchAsync(async (req, res) => {
-  const result = await auth_services.verified_account_into_db(req?.body?.token);
+// const verified_account = catchAsync(async (req, res) => {
+//   const result = await auth_services.verified_account_into_db(req?.body?.token);
 
-  manageResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Account Verification successful.",
-    data: result,
-  });
-});
+//   manageResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "Account Verification successful.",
+//     data: result,
+//   });
+// });
 
-const get_new_verification_link = catchAsync(async (req, res) => {
-  const result = await auth_services.get_new_verification_link_from_db(
-    req?.body?.email
-  );
-  manageResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "New Verification link is send on email.",
-    data: result,
-  });
-});
+// const get_new_verification_link = catchAsync(async (req, res) => {
+//   const result = await auth_services.get_new_verification_link_from_db(
+//     req?.body?.email
+//   );
+//   manageResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "New Verification link is send on email.",
+//     data: result,
+//   });
+// });
 
 export const auth_controllers = {
   login_user,
   get_my_profile,
   refresh_token,
   change_password,
-  reset_password,
-  forget_password,
-  verified_account,
-  get_new_verification_link,
+  // reset_password,
+  // forget_password,
+  // verified_account,
+  // get_new_verification_link,
 };

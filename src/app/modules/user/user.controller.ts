@@ -87,7 +87,7 @@ const getUserByUserId = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   try {
-    const user = await user_services.updateUser(req.params.userId, req.body);
+    const user = await user_services.updateUser(req.params.userId as string, req.body);
     res.json({ success: true, data: user });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });

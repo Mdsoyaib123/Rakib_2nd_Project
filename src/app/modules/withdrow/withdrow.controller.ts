@@ -22,7 +22,7 @@ const acceptWithdraw = async (req: Request, res: Response) => {
   try {
     const { withdrawId } = req.params;
 
-    const result = await WithdrawService.acceptWithdrawService(withdrawId);
+    const result = await WithdrawService.acceptWithdrawService(withdrawId as string);
 
     res.status(200).json({
       success: true,

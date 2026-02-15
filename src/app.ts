@@ -11,7 +11,6 @@ import { configs } from "./app/configs";
 import bcrypt from "bcrypt";
 import cron from "node-cron";
 
-// define app
 const app = express();
 
 // middleware

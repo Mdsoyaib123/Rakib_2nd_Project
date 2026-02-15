@@ -12,19 +12,32 @@ import cron from "node-cron";
 const app = express();
 
 // middleware
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://autotraderonline.net",
+  "https://admin.autotraderonline.net",
+  // Add http versions only if you really still serve http in production (usually not needed)
+  // "http://autotraderonline.net",
+  // "http://admin.autotraderonline.net",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://autotraderonline.net",
-      "https://autotraderonline.net",
-      "http://admin.autotraderonline.net",
-      "https://admin.autotraderonline.net",
-    ],
-    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, origin); // Reflect (echo) the exact Origin value
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"], // add more if you use custom headers
   }),
 );
 app.use(express.json({ limit: "100mb" }));

@@ -26,6 +26,7 @@ app.use(
   "https://autotraderonlline.com",
   "http://admin.autotraderonline.com",
   "https://admin.autotraderonline.com",
+  "http://admin.autotraderonlline.com"
       
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],

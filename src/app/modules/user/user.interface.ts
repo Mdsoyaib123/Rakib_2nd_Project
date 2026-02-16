@@ -64,6 +64,7 @@ export type TUser = {
   };
 
   completedOrderProducts?: string[];
+  uncompletedOrderProducts?: string[];
   orderCountForCheckIn?: number;
   score: number;
   outOfBalance: number;

@@ -131,7 +131,7 @@ const userSchema = new Schema<TUser>(
     userType: { type: String, required: true, default: "Normal" },
     userOrderAmountSlot: {
       type: [Number],
-      default: [10000, 30000, 50000, 100000, 200000, 300000, 500000, 1000000],
+      default: [10500, 30000, 50000, 100000, 200000, 300000, 500000, 1000000],
     },
     userSelectedPackage: { type: Number },
 
@@ -185,6 +185,7 @@ const userSchema = new Schema<TUser>(
     },
 
     completedOrderProducts: { type: [String], default: [] },
+    uncompletedOrderProducts: { type: [String], default: [] },
     orderCountForCheckIn: { type: Number, default: 0 },
     score: { type: Number, default: 0 },
     outOfBalance: { type: Number, default: 0 },

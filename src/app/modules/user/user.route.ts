@@ -50,6 +50,10 @@ router.get(
   "/get-user-completed-products/:userId",
   user_controllers.getUserCompletedProducts,
 );
+router.get(
+  "/get-user-uncompleted-products/:userId",
+  user_controllers.getUserUnCompletedProducts,
+);
 router.patch("/update-score/:userId", user_controllers.updateScore);
 router.patch(
   "/udpate-freeze-withdraw/:userId",

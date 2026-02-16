@@ -51,7 +51,7 @@ const createUser = async (payload: Partial<TUser>) => {
   payload.userDiopsitType = "trial";
   payload.userBalance = 0;
   payload.trialRoundBalance = 10500;
-  payload.userSelectedPackage = 10000;
+  payload.userSelectedPackage = 10500;
   payload.orderRound = {
     round: "trial",
     status: true,
@@ -765,6 +765,18 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         ? user.trialRoundBalance
         : user.userBalance) < product?.price
     ) {
+      await User_Model.updateOne(
+        { userId },
+        {
+          $addToSet: {
+            uncompletedOrderProducts: product.productId.toString(),
+          },
+        },
+        { session },
+      );
+      await session.commitTransaction();
+      session.endSession();
+
       return {
         success: false,
         message:
@@ -822,6 +834,9 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       $push: {
         completedOrderProducts: product.productId.toString(),
       },
+      $pull: {
+        uncompletedOrderProducts: product.productId.toString(), // ✅ REMOVE HERE
+      },
     };
     if (
       user.quantityOfOrders === 1 &&
@@ -836,6 +851,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     if (forcedProductRule) {
       updateQuery.$pull = {
+        ...updateQuery.$pull,
         adminAssaignProductsOrRewards: { orderNumber: currentOrderNumber },
       };
     }
@@ -937,7 +953,36 @@ const getUserCompletedProducts = async (userId: number) => {
   }
 
   // convert string ids → number ids
-  const productIds = user?.completedOrderProducts.map((id) => Number(id));
+  const productIds = user?.completedOrderProducts
+    .map((id) => Number(id))
+    .reverse();
+
+  // fetch all unique products once (performance)
+  const products = await ProductModel.find({
+    productId: { $in: productIds },
+  }).lean();
+  console.log("products", products);
+
+  // create lookup map
+  const productMap = new Map<number, any>();
+  products.forEach((p) => productMap.set(p.productId, p));
+
+  // rebuild array WITH duplicates
+  const result = productIds.map((id) => productMap.get(id)).filter(Boolean);
+
+  return result;
+};
+const getUserUnCompletedProducts = async (userId: number) => {
+  const user = await User_Model.findOne({ userId }).lean();
+
+  if (!user || !user.uncompletedOrderProducts?.length) {
+    return [];
+  }
+
+  // convert string ids → number ids
+  const productIds = user?.uncompletedOrderProducts
+    .map((id) => Number(id))
+    .reverse();
 
   // fetch all unique products once (performance)
   const products = await ProductModel.find({
@@ -1230,6 +1275,7 @@ export const user_services = {
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
   getUserCompletedProducts,
+  getUserUnCompletedProducts,
   updateScore,
   udpateFreezeWithdraw,
   getUserWithdrawAddress,

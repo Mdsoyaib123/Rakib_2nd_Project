@@ -1254,6 +1254,23 @@ const getPlatformRechargeAndWithdrawFromSuperiorData = async () => {
   };
 };
 
+const updatePasswordFromAdmin = async (userId: number, password: string) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  if (!password) {
+    throw new Error("Password is required");
+  }
+  const user = await User_Model.findOne({ userId });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+  await user.save();
+  return user;
+};
+
 export const user_services = {
   createUser,
   getAllUsers,
@@ -1283,4 +1300,5 @@ export const user_services = {
   addBonusReward,
   getSuperiorUserRechargeAndWithdraw,
   getPlatformRechargeAndWithdrawFromSuperiorData,
+  updatePasswordFromAdmin
 };

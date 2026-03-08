@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -20,41 +20,40 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build Project
+      - name: Build TypeScript
         run: npm run build
 
-      - name: Deploy to EC2
+      # Optional: add tests when you implement them
+      # - name: Run tests
+      #   run: npm test
+
+      - name: Deploy to EC2 via SSH + SCP
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            echo "🚀 Starting deployment..."
+            echo "Starting deployment..."
 
-            cd ${{ secrets.EC2_FRONTEND_PATH }}
+            cd ${{ secrets.EC2_APP_PATH }}
 
-            echo "📥 Pulling latest code..."
-            git pull origin main
+            git pull origin main  { echo "Git pull failed"; exit 1; }
 
-            echo "📦 Installing dependencies..."
-            npm install --production
+            npm ci --production   # faster for production, skips dev deps
 
-            echo "🔨 Building project..."
             npm run build
 
-            echo "♻️ Restarting PM2..."
-            pm2 restart ${{ secrets.PM2_APP_NAME }} || {
-              echo "⚡ PM2 process not found, starting new process..."
-              pm2 start dist/server.js --name "${{ secrets.PM2_APP_NAME }}"
+            pm2 restart ${{ secrets.PM2_APP_NAME }}  {
+              echo "PM2 restart failed - trying to start fresh"
+              pm2 start ./dist/server.js --name "${{ secrets.PM2_APP_NAME }}"
               pm2 save
             }
 
-            echo "📊 PM2 Status:"
-            pm2 list
+            pm2 logs --lines 20 ${{ secrets.PM2_APP_NAME }}   # show recent logs for debugging
 
-            echo "✅ Deployment completed!"
+            echo "Deployment finished."

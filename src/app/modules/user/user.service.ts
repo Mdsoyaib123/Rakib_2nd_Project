@@ -780,7 +780,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       return {
         success: false,
         message:
-          "Insufficient balance to purchase this product. Please contact admin support",
+          "Insufficient balance to purchase this product. Please contact customer service",
       };
     }
 

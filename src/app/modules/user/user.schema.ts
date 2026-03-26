@@ -75,7 +75,7 @@ const userSchema = new Schema<TUser>(
           },
         },
         bankAccountNumber: {
-          type: Number,
+          type: String,
           required: function () {
             return this.withdrawMethod === "BankTransfer";
           },

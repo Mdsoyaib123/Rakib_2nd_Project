@@ -21,7 +21,7 @@ export type TUser = {
     name: string;
     withdrawMethod: "MobileBanking" | "BankTransfer";
     bankName?: string;
-    bankAccountNumber?: Number;
+    bankAccountNumber?: string;
     branchName?: string;
     district?: string;
 

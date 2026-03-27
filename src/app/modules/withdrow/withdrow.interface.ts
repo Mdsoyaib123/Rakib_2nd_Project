@@ -11,7 +11,7 @@ export type TWithdraw = {
 
   // Bank Transfer
   bankName?: string;
-  bankAccountNumber?: number;
+  bankAccountNumber?: string;
   branchName?: string;
   district?: string;
 

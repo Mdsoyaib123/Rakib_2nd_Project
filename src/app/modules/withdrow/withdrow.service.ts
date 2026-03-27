@@ -103,7 +103,7 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
   if (withdrawalMethod.withdrawMethod === "BankTransfer") {
     withdrawPayload.bankName = withdrawalMethod.bankName;
     withdrawPayload.bankAccountNumber =
-      withdrawalMethod?.bankAccountNumber as number;
+      withdrawalMethod?.bankAccountNumber as string;
     withdrawPayload.branchName = withdrawalMethod.branchName;
     withdrawPayload.district = withdrawalMethod.district;
   }

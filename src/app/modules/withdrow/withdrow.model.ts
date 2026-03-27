@@ -30,7 +30,7 @@ const withdrawSchema = new Schema<TWithdraw>(
       },
     },
     bankAccountNumber: {
-      type: Number,
+      type: String,
       required: function (this: TWithdraw) {
         return this.withdrawMethod === "BankTransfer";
       },

@@ -33,6 +33,11 @@ router.patch(
   user_controllers.updateAdminAssaignProduct,
 );
 router.patch(
+  "/reset-admin-assigned-products/:userId",
+  user_controllers.resetAdminAssignedProducts,
+);
+
+router.patch(
   "/remove-mystery-reward/:userId",
   user_controllers.removeMysteryReward,
 );

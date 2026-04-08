@@ -262,6 +262,26 @@ const updateAdminAssaignProduct = async (req: Request, res: Response) => {
     });
   }
 };
+const resetAdminAssignedProducts = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.resetAdminAssignedProducts(
+      userId as unknown as number,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Admin assigned products reset successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
 const removeMysteryReward = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -600,6 +620,7 @@ export const user_controllers = {
   updateQuantityOfOrders,
   updateUserSelectedPackageAmount,
   updateAdminAssaignProduct,
+  resetAdminAssignedProducts,
   removeMysteryReward,
   addCheckInReward,
   purchaseOrder,

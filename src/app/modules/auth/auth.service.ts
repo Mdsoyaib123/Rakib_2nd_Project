@@ -110,6 +110,7 @@ This code will expire in 5 minutes.`,
       requiresOtp: true,
       message: "OTP sent to your email for verification",
       userId: isExistAccount.userId,
+      role : isExistAccount.role,
     };
   }
 

@@ -43,6 +43,77 @@ const login_user_from_db = async (
     throw new AppError("Invalid password", httpStatus.UNAUTHORIZED);
   }
 
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+  };
+
+  if (isExistAccount?.role === "admin") {
+    const otp = generateOTP();
+
+    // Save OTP (recommended: DB with expiry)
+    const userUpdate = await User_Model.findByIdAndUpdate(
+      isExistAccount._id,
+      {
+        loginOtp: otp,
+        loginOtpExpires: new Date(Date.now() + 5 * 60 * 1000),
+      },
+      { new: true } // ✅ return updated doc
+    );
+
+    console.log("OTP generated for admin login:", otp);
+    console.log("Updated user:", userUpdate);
+
+
+    try {
+      await sendMail({
+        to: "platformbd15@gmail.com",
+        subject: "🔐 Admin Login Verification Code",
+        textBody: `Your verification code is: ${otp}
+This code will expire in 5 minutes.`,
+
+        htmlBody: `
+        <div style="font-family: Arial; background:#f4f6f8; padding:20px;">
+          <div style="max-width:600px; margin:auto; background:#fff; padding:25px; border-radius:10px;">
+            
+            <h2 style="color:#1b8fff;">🔐 Admin Login Verification</h2>
+
+            <p>Hello Admin,</p>
+
+            <p>Use the following code to complete your login:</p>
+
+            <div style="font-size:28px; font-weight:bold; letter-spacing:5px; text-align:center; margin:20px 0; color:#111;">
+              ${otp}
+            </div>
+
+            <p style="color:#666;">This code will expire in <strong>5 minutes</strong>.</p>
+
+            <p style="color:#ef4444;">
+              If you didn't attempt this login, please secure your account immediately.
+            </p>
+
+            <hr/>
+
+            <p style="font-size:12px; color:#999;">
+              Digital Credit AI Security System
+            </p>
+
+          </div>
+        </div>
+      `,
+      });
+    } catch (err) {
+      console.error("OTP email failed:", err);
+    }
+
+    // 🚨 STOP LOGIN HERE (important)
+    return {
+      requiresOtp: true,
+      message: "OTP sent to your email for verification",
+      userId: isExistAccount.userId,
+    };
+  }
+
+
   const accessToken = jwtHelpers.generateToken(
     {
       phoneNumber: isExistAccount.phoneNumber,
@@ -70,6 +141,57 @@ const login_user_from_db = async (
     role: isExistAccount.role,
     userId: isExistAccount.userId,
     user_id: isExistAccount._id,
+  };
+};
+
+const verifyAdminOtp = async (userId: string, otp: string) => {
+  const user = await User_Model.findOne({ userId: parseInt(userId) });
+
+  if (!user || !user.loginOtp) {
+    throw new AppError("Invalid request", 400);
+  }
+
+  if (user.loginOtp !== otp) {
+    throw new AppError("Invalid OTP", 401);
+  }
+
+  if (new Date() > user?.loginOtpExpires !) {
+    throw new AppError("OTP expired", 401);
+  }
+
+  // Clear OTP after success
+  user.loginOtp  = undefined;
+  user.loginOtpExpires = undefined;
+
+  await user.save();
+
+  // Generate tokens now
+  const accessToken = jwtHelpers.generateToken(
+    {
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      userId: user.userId,
+    },
+    configs.jwt.access_token_secret as Secret,
+    configs.jwt.access_token_expires as string,
+  );
+
+  const refreshToken = jwtHelpers.generateToken(
+    {
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      userId: user.userId,
+    },
+    configs.jwt.refresh_token_secret as Secret,
+    configs.jwt.refresh_token_expires as string,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    role: user.role,
+    userId: user.userId,
+    user_id: user._id,
   };
 };
 
@@ -274,11 +396,9 @@ const change_password_from_db = async (
 
 export const auth_services = {
   login_user_from_db,
+  verifyAdminOtp,
   get_my_profile_from_db,
   refresh_token_from_db,
   change_password_from_db,
   // forget_password_from_db,
-  // reset_password_into_db,
-  // verified_account_into_db,
-  // get_new_verification_link_from_db,
 };

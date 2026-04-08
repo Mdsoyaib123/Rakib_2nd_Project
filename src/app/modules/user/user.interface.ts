@@ -44,6 +44,9 @@ export type TUser = {
   mobilePhoneAreaCode?: string;
   lastLoginIp: string;
   lastLoginTime: Date;
+
+  loginOtp?: string;
+  loginOtpExpires?: Date;
   userType: string;
   userOrderAmountSlot: number[];
   userSelectedPackage?: number;

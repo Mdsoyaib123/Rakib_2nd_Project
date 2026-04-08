@@ -125,8 +125,11 @@ const userSchema = new Schema<TUser>(
     isOnline: { type: Boolean, default: false },
     mobilePhoneAreaCode: { type: String },
 
-    lastLoginIp: { type: String },
-    lastLoginTime: { type: Date },
+    lastLoginIp: { type: String , default: null},
+    lastLoginTime: { type: Date , default: null},
+
+    loginOtp: { type: String },
+    loginOtpExpires: { type: Date },
 
     userType: { type: String, required: true, default: "Normal" },
     userOrderAmountSlot: {

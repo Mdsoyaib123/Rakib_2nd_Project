@@ -34,6 +34,18 @@ const login_user = catchAsync(async (req, res) => {
   });
 });
 
+
+const verifyAdminOtp = catchAsync(async (req, res) => {
+  const { otp,userId } = req.body
+  const result = await auth_services.verifyAdminOtp(userId, otp);
+
+  manageResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "OTP verified successfully!",
+    data: result,
+  });
+});
 const get_my_profile = catchAsync(async (req, res) => {
   const { phoneNumber } = req.user!;
   const result = await auth_services.get_my_profile_from_db(phoneNumber);
@@ -119,6 +131,7 @@ const change_password = catchAsync(async (req, res) => {
 
 export const auth_controllers = {
   login_user,
+  verifyAdminOtp,
   get_my_profile,
   refresh_token,
   change_password,

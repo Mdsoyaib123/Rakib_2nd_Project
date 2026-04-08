@@ -11,6 +11,9 @@ authRoute.post(
   RequestValidator(auth_validation.login_validation),
   auth_controllers.login_user
 );
+authRoute.post(
+  "/verify-admin-otp", auth_controllers.verifyAdminOtp
+);
 
 authRoute.get("/me", auth("admin", "user"), auth_controllers.get_my_profile);
 

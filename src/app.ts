@@ -75,6 +75,7 @@ export const createDefaultSuperAdmin = async () => {
         name: "Admin",
         invitationCode: "adminCode",
         freezeUser: false,
+        
       });
       console.log("✅ Default Admin created.");
     } else {

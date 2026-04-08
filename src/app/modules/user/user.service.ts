@@ -165,7 +165,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
         $set: {
           userDiopsitType:
             user.orderRound.round === "trial" &&
-            user?.orderRound.status === false
+              user?.orderRound.status === false
               ? "diopsit"
               : user.userDiopsitType,
           "orderRound.round": user.orderRound.round,
@@ -358,11 +358,11 @@ const updateAdminAssaignProduct = async (
               orderNumber,
               ...(mysteryboxMethod && mysteryboxAmount
                 ? {
-                    mysterybox: {
-                      method: mysteryboxMethod,
-                      amount: mysteryboxAmount,
-                    },
-                  }
+                  mysterybox: {
+                    method: mysteryboxMethod,
+                    amount: mysteryboxAmount,
+                  },
+                }
                 : {}),
             },
           },
@@ -417,6 +417,28 @@ const updateAdminAssaignProduct = async (
 };
 
 
+const resetAdminAssignedProducts = async (userId: number) => {
+  try {
+    const updatedUser = await User_Model.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          adminAssaignProductsOrRewards: [], // 🔥 full reset
+        },
+      },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    return updatedUser;
+  } catch (error: any) {
+    console.error("❌ Error resetting assignments:", error.message);
+    throw new Error(error.message || "Failed to reset assignments");
+  }
+};
 
 
 const removeMysteryReward = async (userId: number) => {
@@ -476,7 +498,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
 
 
 
-    
+
     if (user?.orderCountForCheckIn <= 40) {
       // ❌ Must complete at least 40 orders
       throw new Error("Complete at least 40 orders to enable daily check-in");
@@ -723,9 +745,9 @@ const purchaseOrder = async (userId: number) => {
       forcedProductRule?.mysterybox?.method === "12x"
         ? forcedProductRule?.mysterybox?.method
         : !forcedProductRule?.mysterybox?.method &&
-            !forcedProductRule?.mysterybox?.amount &&
-            forcedProductRule?.productId &&
-            forcedProductRule?.orderNumber
+          !forcedProductRule?.mysterybox?.amount &&
+          forcedProductRule?.productId &&
+          forcedProductRule?.orderNumber
           ? "3x"
           : null,
     mysteryboxAmount: forcedProductRule?.mysterybox?.amount
@@ -832,7 +854,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         completedOrdersCount: 1,
         orderCountForCheckIn:
           user?.orderRound.round === "round_one" ||
-          user?.orderRound.round === "round_two"
+            user?.orderRound.round === "round_two"
             ? 1
             : 0,
         userBalance: forcedProductRule
@@ -1190,11 +1212,11 @@ const getSuperiorUserRechargeAndWithdraw = async (
             groupBy === "month"
               ? { $dateToString: { format: "%Y-%m", date: "$applicationTime" } }
               : {
-                  $dateToString: {
-                    format: "%Y-%m-%d",
-                    date: "$applicationTime",
-                  },
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$applicationTime",
                 },
+              },
         },
         totalWithdraw: { $sum: "$withdrawalAmount" },
       },
@@ -1298,6 +1320,7 @@ export const user_services = {
   updateUserSelectedPackageAmount,
   updateQuantityOfOrders,
   updateAdminAssaignProduct,
+  resetAdminAssignedProducts,
   removeMysteryReward,
   addCheckInReward,
   purchaseOrder,

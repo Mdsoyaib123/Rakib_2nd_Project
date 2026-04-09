@@ -166,7 +166,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
           userDiopsitType:
             user.orderRound.round === "trial" &&
               user?.orderRound.status === false
-              ? "diopsit"
+              ? "deposit"
               : user.userDiopsitType,
           "orderRound.round": user.orderRound.round,
           "orderRound.status": false, //

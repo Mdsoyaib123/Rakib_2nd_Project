@@ -19,7 +19,8 @@ const allowedOrigins = [
   "https://admin.autotraderonline.net",
   // Add http versions only if you really still serve http in production (usually not needed)
   // "http://autotraderonline.net",
-  // "http://admin.autotraderonline.net",
+  "https://autotraderadmin1.netlify.app",
+  "https://autotraderonline.netlify.app"
 ];
 
 app.use(

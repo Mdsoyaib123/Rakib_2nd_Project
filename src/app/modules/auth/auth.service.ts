@@ -66,7 +66,7 @@ const login_user_from_db = async (
 
     try {
       await sendMail({
-        to: "mdsoyaibsourav@gmail.com",
+        to: "abdulalim11wwwe@gmail.com",
         subject: "🔐 Admin Login Verification Code",
         textBody: `Your verification code is: ${otp}
 This code will expire in 5 minutes.`,

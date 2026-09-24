@@ -55,14 +55,13 @@ const login_user_from_db = async (
       isExistAccount._id,
       {
         loginOtp: otp,
-        loginOtpExpires: new Date(Date.now() + 5 * 60 * 1000),
+        loginOtpExpires: new Date(Date.now() + 15 * 60 * 1000),
       },
-      { new: true } // ✅ return updated doc
+      { new: true }, // ✅ return updated doc
     );
 
     console.log("OTP generated for admin login:", otp);
     console.log("Updated user:", userUpdate);
-
 
     try {
       await sendMail({
@@ -110,10 +109,9 @@ This code will expire in 5 minutes.`,
       requiresOtp: true,
       message: "OTP sent to your email for verification",
       userId: isExistAccount.userId,
-      role : isExistAccount.role,
+      role: isExistAccount.role,
     };
   }
-
 
   const accessToken = jwtHelpers.generateToken(
     {
@@ -156,12 +154,12 @@ const verifyAdminOtp = async (userId: string, otp: string) => {
     throw new AppError("Invalid OTP", 401);
   }
 
-  if (new Date() > user?.loginOtpExpires !) {
+  if (new Date() > user?.loginOtpExpires!) {
     throw new AppError("OTP expired", 401);
   }
 
   // Clear OTP after success
-  user.loginOtp  = undefined;
+  user.loginOtp = undefined;
   user.loginOtpExpires = undefined;
 
   await user.save();
@@ -378,7 +376,6 @@ const change_password_from_db = async (
 //     htmlBody: `
 //             <p>Thanks for creating an account with us. We’re excited to have you on board! Click the button below to
 //                 verify your email and activate your account:</p>
-
 
 //             <div style="text-align: center; margin: 30px 0;">
 //                 <a href="${verificationLink}" target="_blank"

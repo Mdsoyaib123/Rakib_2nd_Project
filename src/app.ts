@@ -25,7 +25,9 @@ const allowedOrigins = [
   "https://autotraderbd.co",
   "https://admin.autotraderbd.co",
   "https://autotraderonline.netlify.app",
-  "https://autotraderadmin1.netlify.app"
+  "https://autotraderadmin1.netlify.app",
+  "https://autotraderonline.netlify.app",
+  "https://autotraderonlinesadmin.netlify.app"
 
 
  

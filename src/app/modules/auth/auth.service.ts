@@ -64,42 +64,42 @@ const login_user_from_db = async (
     console.log("Updated user:", userUpdate);
 
     try {
-      await sendMail({
-        to: "abdulalim11wwwe@gmail.com",
-        subject: "🔐 Admin Login Verification Code",
-        textBody: `Your verification code is: ${otp}
-This code will expire in 5 minutes.`,
+//       await sendMail({
+//         to: "abdulalim11wwwe@gmail.com",
+//         subject: "🔐 Admin Login Verification Code",
+//         textBody: `Your verification code is: ${otp}
+// This code will expire in 15 minutes.`,
 
-        htmlBody: `
-        <div style="font-family: Arial; background:#f4f6f8; padding:20px;">
-          <div style="max-width:600px; margin:auto; background:#fff; padding:25px; border-radius:10px;">
+//         htmlBody: `
+//         <div style="font-family: Arial; background:#f4f6f8; padding:20px;">
+//           <div style="max-width:600px; margin:auto; background:#fff; padding:25px; border-radius:10px;">
             
-            <h2 style="color:#1b8fff;">🔐 Admin Login Verification</h2>
+//             <h2 style="color:#1b8fff;">🔐 Admin Login Verification</h2>
 
-            <p>Hello Admin,</p>
+//             <p>Hello Admin,</p>
 
-            <p>Use the following code to complete your login:</p>
+//             <p>Use the following code to complete your login:</p>
 
-            <div style="font-size:28px; font-weight:bold; letter-spacing:5px; text-align:center; margin:20px 0; color:#111;">
-              ${otp}
-            </div>
+//             <div style="font-size:28px; font-weight:bold; letter-spacing:5px; text-align:center; margin:20px 0; color:#111;">
+//               ${otp}
+//             </div>
 
-            <p style="color:#666;">This code will expire in <strong>5 minutes</strong>.</p>
+//             <p style="color:#666;">This code will expire in <strong>5 minutes</strong>.</p>
 
-            <p style="color:#ef4444;">
-              If you didn't attempt this login, please secure your account immediately.
-            </p>
+//             <p style="color:#ef4444;">
+//               If you didn't attempt this login, please secure your account immediately.
+//             </p>
 
-            <hr/>
+//             <hr/>
 
-            <p style="font-size:12px; color:#999;">
-              Digital Credit AI Security System
-            </p>
+//             <p style="font-size:12px; color:#999;">
+//               Digital Credit AI Security System
+//             </p>
 
-          </div>
-        </div>
-      `,
-      });
+//           </div>
+//         </div>
+//       `,
+//       });
     } catch (err) {
       console.error("OTP email failed:", err);
     }

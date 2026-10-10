@@ -22,7 +22,8 @@ const allowedOrigins = [
   "https://autotraderonlines.netlify.app",
   "https://autotraderonlinesadmin.netlify.app",
   "https://autotraderonlline.netlify.app",
-  "https://autotraderadmin.netlify.app"
+  "https://autotraderadmin.netlify.app",
+  "https://effervescent-sunburst-4126be.netlify.app"
 
 
  

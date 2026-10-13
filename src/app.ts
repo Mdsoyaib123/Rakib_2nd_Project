@@ -27,9 +27,6 @@ const allowedOrigins = [
   "https://autotraderonlline.net",
   "https://admin.autotraderonlline.net"
 
-
-
- 
 ];
 
 app.use(
